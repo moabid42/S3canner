@@ -42,7 +42,7 @@ resource "aws_s3" "abjalert_log_bucket" {
 
 // Source S3 bucket where we store the uploaded binaries (here will be automatically analyzed)
 resource "aws_s3_bucket" "objalert_binaries" {
-    bucket = "${var.name_prefix}.binaryalert-binaries.${var.aws_region}"
+    bucket = "${var.name_prefix}.objalert-binaries.${var.aws_region}"
     acl = "private"
 
     logging {
@@ -64,5 +64,15 @@ resource "aws_s3_bucket" "objalert_binaries" {
     }
 }
 
-// Still have to create the S3 bucket notification that triggers
-// the SQS queue to receive a message when a new object is created.
+resource "aws_s3_bucket_notification" "bucket_notification" {
+    bucket = "${aws_s3_bucket.objalert_binaries.id}"
+
+    queue {
+        queue_arn = "${aws_sqs_queue.s3_object_queue.arn}"
+        events = ["s3:ObjectCreated:*"]
+    }
+
+    depends_on = ["aws_sqs_queue_policy.s3_object_queue_policy"]
+}
+
+

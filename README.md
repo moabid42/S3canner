@@ -10,7 +10,7 @@ This project is about creating a serverless AWS pipeline where any object added 
 ![smth](./img/chartflow.png)
 
 ## Terraform Config
-This configuration file provides various settings that define the behavior and performance of BinaryAlert, a system for detecting malicious files using Amazon Web Services (AWS) resources. Here's a breakdown of the individual settings:
+This configuration file provides various settings that define the behavior and performance of ObjAlert, a system for detecting malicious files using Amazon Web Services (AWS) resources. Here's a breakdown of the individual settings:
 
 1. ***sqs_retention_minutes***: This setting specifies the duration for which messages should be retained in the Simple Queue Service (SQS) before they are dropped. SQS is used as an intermediary between S3 Events and the Analyzer Lambda function. Messages that are dispatched to analyzers will continue to be processed until they time out. In this case, messages are retained for 30 minutes.
 
@@ -53,3 +53,36 @@ This module consists of several resources, including an IAM policy document, an 
 - SNS
 - S3Buckets
 - Lambda functions
+
+## Infrastructure Details:
+### S3
+
+1. ***aws_s3_bucket*** resource named objalert_log_bucket for storing access logs:
+- The bucket name is created using the var.name_prefix and var.aws_region.
+- The lifecycle rule rotates all objects to infrequent access storage class after 30 days and removes them after var.s3_log_expiration_days.
+- The bucket enables S3 access logging to the same bucket with a prefix of **self/**.
+- The bucket is versioned and has a tag of **Objalert**.
+2. ***aws_s3_bucket*** resource named objalert_binaries for storing binaries to be analyzed:
+- The bucket name is created using the var.name_prefix and var.aws_region.
+- The bucket enables S3 access logging to the user-defined logging bucket or the one created in objalert_log_bucket.
+- The bucket has a lifecycle rule that removes all old/deleted object versions after 1 day.
+- The bucket is versioned and has a tag of **ObjAlert**.
+3. ***aws_s3_bucket_notification*** resource named bucket_notification that sets up a notification for object creation events in the objalert_binaries bucket to be sent to the aws_sqs_queue named s3_object_queue.
+
+**Note** that the aws_s3_bucket resources have versioning enabled to protect against accidental deletes, and aws_s3_bucket_notification resource depends on aws_sqs_queue_policy.s3_object_queue_policy to ensure that the SQS queue policy is created before setting up the notification.
+
+### SQS
+
+1. Resource **aws_sqs_queue** named **s3_object_queue**:
+- The queue name is created using the **name_prefix** variable.
+- The **visibility_timeout_seconds** parameter is set to the value of **lambda_analyze_timout_sec** variable plus 3 seconds.
+- The **message_retention_seconds** parameter is set to the value of **sqs_retention_minutes** variable converted to seconds.
+
+2. Data **aws_iam_policy_document** named **s3_object_queue_policy**:
+- A policy document is defined to allow S3 to send messages to the **s3_object_queue** queue.
+- The **effect** parameter is set to **Allow** to grant permission.
+- The **principals** parameter is set to allow all AWS identities.
+- The **actions** parameter is set to allow the **sqs:SendMessage** action.
+- The **resources** parameter is set to allow the **s3_object_queue** resource ARN.
+- The **condition** block restricts the notification to the **objalert_binaries** bucket by comparing the source ARN with the **arn** of the **aws_s3_bucket** resource named **objalert_binaries**.
+

@@ -5,7 +5,7 @@
 aws_region = "eu-central-1"
 
 // Haufe Prefix
-name_prefix = "hg-"
+name_prefix = "hg"
 
 #####   ADvanced Config    #####
 // Retention in SQS
