@@ -33,7 +33,7 @@ lambda_dispatch_timeout_sec = 40
 
             # Analyzer config #
 // Expected invoke frequency
-expected_lambda_analyze_frequency_minutes = 30
+expected_analysis_frequency_minutes = 30
 
 // Memory limit for analyzing
 lambda_analyze_memory_mb = 512

@@ -1,1 +1,5 @@
-core/terrafor
+.terraform*
+err*
+*.zip
+*.tfstate*
+tfplane

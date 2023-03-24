@@ -8,6 +8,9 @@ variable "name_prefix" {
 
 variable "sqs_retention_minutes" {
 }
+variable "tagged_name" {
+  default = "Objalert"
+}
 
 
 variable "lambda_batch_objects_per_message" {
@@ -20,8 +23,6 @@ variable "lambda_dispatch_frequency_minutes" {
 }
 variable "lambda_dispatch_limit" {
 }
-
-
 variable "lambda_dispatch_memory_mb" {
 }
 variable "lambda_dispatch_timeout_sec" {
