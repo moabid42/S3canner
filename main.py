@@ -18,6 +18,27 @@ TERRAFORM_DIR = os.path.join(CORE_DIR, 'terraform')
 # Terraform config
 TERRAFORM_CONFIG = os.path.join(TERRAFORM_DIR, 'terraform.tfvars')
 
+# Analyzer Lambda function source and zip package
+ANALYZE_LAMBDA_SOURCE = os.path.join(PROJECT_DIR, 'core', 'lambda_functions', 'analyzer')
+ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer.zip') 
+
+# Batch Lambda function source and zip package
+BATCH_LAMBDA_SOURCE = os.path.join(PROJECT_DIR, 'core', 'lambda_functions', 'batcher', 'main.py')
+BATCH_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_batcher.zip')
+
+# Dispatch Lambda function source and zip package
+DISPATCH_LAMBDA_SOURCE = os.path.join(PROJECT_DIR, 'core', 'lambda_functions', 'dispatcher', 'main.py')
+DISPATCH_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_dispatcher.zip')
+
+# NAME_PREFIX
+NAME_PREFIX = 'hg-'
+
+# Lambda alias terraform targets, to be updated separately.
+LAMBDA_ALIASES_TERRAFORM_TARGETS = [
+    '-target=module.{}objalert_{}.aws_lambda_alias.production_alias'.format(NAME_PREFIX, name)
+    for name in ['analyzer', 'batcher', 'dispatcher']
+]
+
 ''' Core function '''
 
 def deploy() -> None:
@@ -30,9 +51,18 @@ def test() -> None:
     # Run all uni tests and exit 1 if tests failed
     return 
 
-def build_dispatcher_():
+def _build_batcher():
+    # Build the batcher Lambda deployment package
+    print('Creating batcher deploy package...')
+    with zipfile.ZipFile(BATCH_LAMBDA_PACKAGE, 'w') as pkg:
+        pkg.write(BATCH_LAMBDA_SOURCE, os.path.basename(BATCH_LAMBDA_SOURCE))
+
+
+def _build_dispatcher():
     # Build the dispatcher Lambda deployment package
-    return
+    print('Creating dispatcher deploy package...')
+    with zipfile.ZipFile(DISPATCH_LAMBDA_PACKAGE, 'w') as pkg:
+        pkg.write(DISPATCH_LAMBDA_SOURCE, os.path.basename(DISPATCH_LAMBDA_SOURCE))
 
 def build_analyser_():
     # Build the YARA analyser Lambda deplyment package
@@ -40,8 +70,9 @@ def build_analyser_():
 
 def build() -> None:
     # Build the Lambda deployment packages
-    build_dispatcher_() # I use _ in the end based on google standards 
     build_analyser_()
+    build_batcher()
+    build_dispatcher_() # I use _ in the end based on google standards 
     return 
 
 def apply() -> None:
@@ -59,6 +90,8 @@ def apply() -> None:
     subprocess.check_call(['terraform', 'apply'])
 
     # Second apply to update the lambda aliases still needed
+    subprocess.check_call(
+        ['terraform', 'apply', '-refresh=false'] + LAMBDA_ALIASES_TERRAFORM_TARGETS) # -refresch=false option to skip refresh step to avoid potential conflicts
 
 '''---------------'''
 

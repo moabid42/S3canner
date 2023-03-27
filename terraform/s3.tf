@@ -98,6 +98,26 @@ resource "aws_s3_bucket" "objalert_binaries" {
   }
 }
 
+// Blocking public access to S3 buckets
+resource "aws_s3_bucket_public_access_block" "block_objalert_binaries_bucket" {
+  bucket = aws_s3_bucket.objalert_binaries.id
+
+  restrict_public_buckets = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+}
+
+resource "aws_s3_bucket_public_access_block" "block_objalert_log_bucket" {
+  bucket = aws_s3_bucket.objalert_log_bucket.id
+
+  restrict_public_buckets = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+}
+
+# Notification event to SQS
 resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = "${aws_s3_bucket.objalert_binaries.id}"
 
