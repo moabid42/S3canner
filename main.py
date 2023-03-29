@@ -5,10 +5,14 @@ import glob
 import boto3
 import shutil
 import zipfile
+import logging
 import argparse
 import tempfile
 import unittest
 import subprocess
+
+# LOGGER 
+LOGGER = logging.getLogger(__name__)
 
 # Root dir
 PROJ_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -112,8 +116,9 @@ def main() -> None:
     secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     session_token = os.environ.get('AWS_SESSION_TOKEN')
     if not all([access_key_id, secret_access_key, session_token]):
-        print('Error: AWS environment variables are not set')
-        return
+        error_msg = "Error: AWS environment variables are not set"
+        LOGGER.error(error_msg)
+        raise ValueError(error_msg)
 
     # Arg parsing
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter) # Here we are using the formatter class for more help output readability
