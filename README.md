@@ -22,13 +22,13 @@ This project is about creating a serverless AWS pipeline where any object added 
       ```bash
         make
       ```
-      - You can run check the help menu using:
+      - You can check the help menu using:
       ```bash
         make help
       ```
       - You can run build using :
       ```bash
-        make
+        make build
       ```
       - You can generate the resources only, using :
       ```bash
