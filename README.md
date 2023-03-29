@@ -5,6 +5,39 @@
 ## Overview
 This project is about creating a serverless AWS pipeline where any object added to an S3 bucket is scanned with YARA rules + Sensitive information detector. If a match is found an alert will be fired, for fast incident response.
 
+## Quick Start
+  1. Install dependencies:
+      - Install python3, pip3 and [Terraform](https://www.terraform.io/intro/getting-started/install.html).
+  2. Configure settings:
+      - Set your AWS credentials using any
+      [method supported by Terraform](https://www.terraform.io/docs/providers/aws/#authentication).
+      The two simplest options are to run `aws configure` (saves `~/.aws/credentials` file) or
+      ```bash
+      export AWS_DEFAULT_REGION="region-name"
+      export AWS_ACCESS_KEY_ID="access-key"
+      export AWS_SECRET_ACCESS_KEY="secret-key"
+      ```
+  3. Makefile guide:
+      - You can deploy using :
+      ```bash
+        make
+      ```
+      - You can run check the help menu using:
+      ```bash
+        make help
+      ```
+      - You can run build using :
+      ```bash
+        make
+      ```
+      - You can generate the resources only, using :
+      ```bash
+        make terraform
+      ```
+      - You can destroy the resources using :
+      ```bash
+        make destroy
+      ```
 
 ## Architecture
 ![smth](./img/chartflow.png)

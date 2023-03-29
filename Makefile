@@ -46,7 +46,15 @@ backend:
 	terraform -chdir=$(BACKEND_DIR) init && \
 	terraform -chdir=$(BACKEND_DIR) apply
 
-fclean:
+help:
+	@echo 'make deploy or make	Deploy ObjAlert. Equivalent to test + build + apply.'
+	@echo 'make test          	Run unit tests.'
+	@echo 'make build         	Build Lambda packages (saves *.zip files in terraform/).'
+	@echo 'make apply         	Terraform validate and apply any configuration/package changes.'
+	@echo 'make require         Install the dependencies and requirement.'
+	@echo 'make destroy          Destroy and delete all the resources'
+
+destroy:
 	terraform -chdir=$(TERRAFORM_ROOT) destroy
 
 .PHONY: all deploy test build apply require terraform backend flcean
