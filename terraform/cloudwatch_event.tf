@@ -7,7 +7,7 @@ resource "aws_cloudwatch_event_rule" "dispatch_cronjob" {
 }
 
 resource "aws_cloudwatch_event_target" "invoke_dispatch_lambda" {
-  rule      = "${aws_cloudwatch_event_rule.dispatch_cronjob.name}"
+  rule      = aws_cloudwatch_event_rule.dispatch_cronjob.name
   target_id = "${var.name_prefix}_objalert_dispatch_to_lambda"
-  arn       = "${module.objalert_dispatcher.alias_arn}"
+  arn       = module.objalert_dispatcher.alias_arn
 }

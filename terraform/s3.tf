@@ -19,9 +19,9 @@
 
 // S3 bucket for storing access logs.
 resource "aws_s3_bucket" "objalert_log_bucket" {
-  count = "${var.s3_log_bucket == "" ? 1 : 0}" // Create only if no pre-existing log bucket.
+  count = var.s3_log_bucket == "" ? 1 : 0 // Create only if no pre-existing log bucket.
 
-  bucket = "${format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)}"
+  bucket = format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
   acl    = "log-delivery-write"
 
   // Everything in the log bucket rotates to infrequent access and expires.
@@ -36,7 +36,7 @@ resource "aws_s3_bucket" "objalert_log_bucket" {
     }
 
     expiration {
-      days = "${var.s3_log_expiration_days}"
+      days = var.s3_log_expiration_days
     }
 
     // Old/deleted object versions are permanently removed after 1 day.
@@ -48,7 +48,7 @@ resource "aws_s3_bucket" "objalert_log_bucket" {
   // Enable logging on the logging bucket itself.
   logging {
     // The target bucket is the same as the name of this bucket.
-    target_bucket = "${format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)}"
+    target_bucket = format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
     target_prefix = "self/"
   }
 
@@ -70,11 +70,11 @@ resource "aws_s3_bucket" "objalert_binaries" {
   logging {
     // Send S3 access logs to either the user-defined logging bucket or the one we created.
     // Note: We can't reference log bucket ID here becuase the bucket may not exist.
-    target_bucket = "${var.s3_log_bucket == "" ?
+    target_bucket = (var.s3_log_bucket == "" ?
       format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
-      : var.s3_log_bucket}"
+    : var.s3_log_bucket)
 
-    target_prefix = "${var.s3_log_prefix}"
+    target_prefix = var.s3_log_prefix
   }
 
   // Note: STANDARD_IA is not worth it because of the need to periodically re-analyze all binaries
@@ -109,7 +109,7 @@ resource "aws_s3_bucket_public_access_block" "block_objalert_binaries_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "block_objalert_log_bucket" {
-  bucket = aws_s3_bucket.objalert_log_bucket.id
+  bucket = aws_s3_bucket.objalert_log_bucket[0].id
 
   restrict_public_buckets = true
   block_public_acls       = true
@@ -119,10 +119,10 @@ resource "aws_s3_bucket_public_access_block" "block_objalert_log_bucket" {
 
 # Notification event to SQS
 resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = "${aws_s3_bucket.objalert_binaries.id}"
+  bucket = aws_s3_bucket.objalert_binaries.id
 
   queue {
-    queue_arn = "${aws_sqs_queue.s3_object_queue.arn}"
+    queue_arn = aws_sqs_queue.s3_object_queue.arn
     events    = ["s3:ObjectCreated:*"]
   }
 

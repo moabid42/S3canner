@@ -41,7 +41,7 @@ EOF
   // No binaries analyzed for a while.
   comparison_operator       = "LessThanOrEqualToThreshold"
   threshold                 = 0
-  period                    = "${format("%d", var.expected_analysis_frequency_minutes * 60)}"
+  period                    = format("%d", var.expected_analysis_frequency_minutes * 60)
   evaluation_periods        = 1
   alarm_actions             = ["${aws_sns_topic.metric_alarms.arn}"]
   insufficient_data_actions = ["${aws_sns_topic.metric_alarms.arn}"]

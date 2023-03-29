@@ -28,7 +28,7 @@ module "objalert_batcher" {
 
   log_retention_days = var.lambda_log_retention_days
   alarm_sns_arns     = ["${aws_sns_topic.metric_alarms.arn}"]
-  tagged_name        = var.tagged_name 
+  tagged_name        = var.tagged_name
 }
 
 // Create the dispatching Lambda function.
@@ -49,19 +49,19 @@ module "objalert_dispatcher" {
     SQS_QUEUE_URL            = "${aws_sqs_queue.s3_object_queue.id}"
   }
 
-  log_retention_days = "${var.lambda_log_retention_days}"
+  log_retention_days = var.lambda_log_retention_days
   alarm_sns_arns     = ["${aws_sns_topic.metric_alarms.arn}"]
-  tagged_name        = var.tagged_name 
+  tagged_name        = var.tagged_name
 }
 
 // Allow dispatcher to be invoked via a CloudWatch rule.3
 resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
   statement_id  = "AllowExecutionFromCloudWatch_${module.objalert_dispatcher.function_name}"
   action        = "lambda:InvokeFunction"
-  function_name = "${module.objalert_dispatcher.function_name}"
+  function_name = module.objalert_dispatcher.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_event_rule.dispatch_cronjob.arn}"
-  qualifier     = "${module.objalert_dispatcher.alias_name}"
+  source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
+  qualifier     = module.objalert_dispatcher.alias_name
 }
 
 // Create the analyzer Lambda function.
@@ -69,10 +69,10 @@ module "objalert_analyzer" {
   source          = "./modules/lambda"
   function_name   = "${var.name_prefix}_objalert_analyzer"
   description     = "Analyze a obj with a set of YARA rules"
-  base_policy_arn = "${aws_iam_policy.base_policy.arn}"
+  base_policy_arn = aws_iam_policy.base_policy.arn
   handler         = "lambda_functions.analyzer.main.analyze_lambda_handler"
-  memory_size_mb  = "${var.lambda_analyze_memory_mb}"
-  timeout_sec     = "${var.lambda_analyze_timeout_sec}"
+  memory_size_mb  = var.lambda_analyze_memory_mb
+  timeout_sec     = var.lambda_analyze_timeout_sec
   filename        = "lambda_analyzer.zip"
 
   environment_variables = {
@@ -82,8 +82,8 @@ module "objalert_analyzer" {
     YARA_ALERTS_SNS_TOPIC_ARN      = "${aws_sns_topic.yara_match_alerts.arn}"
   }
 
-  log_retention_days = "${var.lambda_log_retention_days}"
-  tagged_name        = var.tagged_name 
+  log_retention_days = var.lambda_log_retention_days
+  tagged_name        = var.tagged_name
   // During batch operations, the analyzer will have a high error rate because of S3 latency.
   alarm_errors_help = <<EOF
 If (a) the number of errors is not growing unbounded,

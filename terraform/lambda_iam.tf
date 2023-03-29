@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "base_policy" {
 
 resource "aws_iam_policy" "base_policy" {
   name   = "${var.name_prefix}_objalert_base_policy"
-  policy = "${data.aws_iam_policy_document.base_policy.json}"
+  policy = data.aws_iam_policy_document.base_policy.json
 }
 
 data "aws_iam_policy_document" "objalert_batcher_policy" {
@@ -46,8 +46,8 @@ data "aws_iam_policy_document" "objalert_batcher_policy" {
 
 resource "aws_iam_role_policy" "objalert_batcher_policy" {
   name   = "${var.name_prefix}_objalert_batcher_policy"
-  role   = "${module.objalert_batcher.role_id}"
-  policy = "${data.aws_iam_policy_document.objalert_batcher_policy.json}"
+  role   = module.objalert_batcher.role_id
+  policy = data.aws_iam_policy_document.objalert_batcher_policy.json
 }
 
 data "aws_iam_policy_document" "objalert_dispatcher_policy" {
@@ -73,8 +73,8 @@ data "aws_iam_policy_document" "objalert_dispatcher_policy" {
 
 resource "aws_iam_role_policy" "objalert_dispatcher_policy" {
   name   = "${var.name_prefix}_objalert_dispatcher_policy"
-  role   = "${module.objalert_dispatcher.role_id}"
-  policy = "${data.aws_iam_policy_document.objalert_dispatcher_policy.json}"
+  role   = module.objalert_dispatcher.role_id
+  policy = data.aws_iam_policy_document.objalert_dispatcher_policy.json
 }
 
 data "aws_iam_policy_document" "objalert_analyzer_policy" {
@@ -115,6 +115,6 @@ data "aws_iam_policy_document" "objalert_analyzer_policy" {
 
 resource "aws_iam_role_policy" "objalert_analyzer_policy" {
   name   = "${var.name_prefix}_objalert_analyzer_policy"
-  role   = "${module.objalert_analyzer.role_id}"
-  policy = "${data.aws_iam_policy_document.objalert_analyzer_policy.json}"
+  role   = module.objalert_analyzer.role_id
+  policy = data.aws_iam_policy_document.objalert_analyzer_policy.json
 }

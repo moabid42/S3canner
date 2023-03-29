@@ -3,8 +3,8 @@ resource "aws_dynamodb_table" "objalert_yara_matches" {
   name           = "${var.name_prefix}_objalert_matches"
   hash_key       = "SHA256"
   range_key      = "LambdaVersion"
-  read_capacity  = "${var.dynamo_read_capacity}"
-  write_capacity = "${var.dynamo_write_capacity}"
+  read_capacity  = var.dynamo_read_capacity
+  write_capacity = var.dynamo_write_capacity
 
   // Only attributes used as hash/range keys are defined here.
   attribute {
