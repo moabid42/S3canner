@@ -132,3 +132,15 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   // The queue policy must be created before we can configure the S3 notification.
   depends_on = [aws_sqs_queue_policy.s3_object_queue_policy]
 }
+
+# Notfiy the lambda function
+resource "aws_s3_bucket_notification" "lambda_bucket_notification" {
+  bucket = aws_s3_bucket.objalert_binaries.id
+
+  lambda_function {
+    lambda_function_arn = module.objalert_batcher.function_arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = ""
+    filter_suffix       = ""
+  }
+}

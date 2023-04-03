@@ -13,7 +13,7 @@ module "objalert_batcher" {
   function_name   = "${var.name_prefix}_objalert_batcher"
   description     = "Enqueues all S3 objects into SQS for re-analysis"
   base_policy_arn = aws_iam_policy.base_policy.arn
-  handler         = "lambda_functions.batcher.main.batch_lambda_handler"
+  handler         = "main.batch_lambda_handler"
   memory_size_mb  = var.lambda_batch_memory_mb
   timeout_sec     = 300
   filename        = "lambda_batcher.zip"
@@ -39,25 +39,13 @@ resource "aws_lambda_permission" "allow_s3_trigger" {
   source_arn    = aws_s3_bucket.objalert_binaries.arn
 }
 
-# Notfiy the lambda function
-resource "aws_s3_bucket_notification" "lambda_bucket_notification" {
-  bucket = aws_s3_bucket.objalert_binaries.id
-
-  lambda_function {
-    lambda_function_arn = module.objalert_batcher.function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = ""
-    filter_suffix       = ""
-  }
-}
-
 // Create the dispatching Lambda function.
 module "objalert_dispatcher" {
   source          = "./modules/lambda"
   function_name   = "${var.name_prefix}_objalert_dispatcher"
   description     = "Poll SQS events and fire them off to analyzers"
   base_policy_arn = aws_iam_policy.base_policy.arn
-  handler         = "lambda_functions.dispatcher.main.dispatch_lambda_handler"
+  handler         = "main.dispatch_lambda_handler"
   memory_size_mb  = var.lambda_dispatch_memory_mb
   timeout_sec     = var.lambda_dispatch_timeout_sec
   filename        = "lambda_dispatcher.zip"
@@ -90,7 +78,7 @@ module "objalert_analyzer" {
   function_name   = "${var.name_prefix}_objalert_analyzer"
   description     = "Analyze a obj with a set of YARA rules"
   base_policy_arn = aws_iam_policy.base_policy.arn
-  handler         = "lambda_functions.analyzer.main.analyze_lambda_handler"
+  handler         = "main.analyze_lambda_handler"
   memory_size_mb  = var.lambda_analyze_memory_mb
   timeout_sec     = var.lambda_analyze_timeout_sec
   filename        = "lambda_analyzer.zip"

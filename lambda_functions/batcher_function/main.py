@@ -118,22 +118,27 @@ class S3BucketEnumerator:
     def __init__(self, bucket_name: str, continuation_token: str = None):
         self.bucket_name: str = bucket_name
         self.continuation_token: str = continuation_token
+        self.keys: List[str] = []
 
     # Get the next page of S3 objects.
-    def get_keys_generator(self) -> Generator[str, None, None]:
+    def get_keys_list(self) -> List[str]:
         try:
-            if self.continuation_token:
-                response = boto3.client('s3').list_objects_v2(
-                    Bucket=self.bucket_name, ContinuationToken=self.continuation_token)
-            else:
-                response = boto3.client('s3').list_objects_v2(Bucket=self.bucket_name)
+            while True:
+                if self.continuation_token:
+                    response = boto3.client('s3').list_objects_v2(
+                        Bucket=self.bucket_name, ContinuationToken=self.continuation_token)
+                else:
+                    response = boto3.client('s3').list_objects_v2(Bucket=self.bucket_name)
 
-            self.continuation_token = response.get('NextContinuationToken')
-            if not response['IsTruncated']:
-                self.continuation_token = None
+                self.continuation_token = response.get('NextContinuationToken')
+                if not response['IsTruncated']:
+                    self.continuation_token = None
 
-            for obj in response['Contents']:
-                yield obj['Key']
+                for obj in response['Contents']:
+                    self.keys.append(obj['Key'])
+
+                if not self.continuation_token:
+                    return self.keys
         
         except ClientError as e:
             raise Exception(f"Failed to list objects in bucket {self.bucket_name}: {e}") from e
@@ -148,9 +153,10 @@ def batch_lambda_handler(event, lambda_context):
     # As long as there are at least 10 seconds remaining, enumerate S3 objects into SQS.
     num_keys = 0
     while lambda_context.get_remaining_time_in_millis() > 10000 and s3_enumerator.continuation_token is not None:
-        for key in s3_enumerator.get_keys_generator():
+        keys = s3_enumerator.get_keys_generator()
+        num_keys += len(keys)
+        for key in keys:
             sqs_batcher.add_key(key)
-            num_keys += 1
     
     LOGGE.info('Enumerated %d keys into %d batches', num_keys, sqs_batcher._msg_index)
 

@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 PROJ_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Core dir
-CORE_DIR = os.path.join(PROJ_DIR, 'core')
+CORE_DIR = os.path.join(PROJ_DIR, './')
 
 # Terraform dir
 TERRAFORM_DIR = os.path.join(PROJ_DIR, 'terraform')
@@ -27,15 +27,15 @@ TERRAFORM_DIR = os.path.join(PROJ_DIR, 'terraform')
 TERRAFORM_CONFIG = os.path.join(TERRAFORM_DIR, 'terraform.tfvars')
 
 # Analyzer Lambda function source and zip package
-ANALYZE_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'core', 'lambda_functions', 'analyzer_function', 'main.py')
+ANALYZE_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'lambda_functions', 'analyzer_function', 'main.py')
 ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer.zip') 
 
 # Batch Lambda function source and zip package
-BATCH_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'core', 'lambda_functions', 'batcher_function', 'main.py')
+BATCH_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'lambda_functions', 'batcher_function', 'main.py')
 BATCH_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_batcher.zip')
 
 # Dispatch Lambda function source and zip package
-DISPATCH_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'core', 'lambda_functions', 'dispatcher_function', 'main.py')
+DISPATCH_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'lambda_functions', 'dispatcher_function', 'main.py')
 DISPATCH_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_dispatcher.zip')
 
 # NAME_PREFIX
@@ -103,8 +103,7 @@ def apply() -> None:
     subprocess.check_call(['terraform', 'apply', '-auto-approve'])
 
     # Second apply to update the lambda aliases still needed
-    subprocess.check_call(
-        ['terraform', 'apply', '-refresh=false'] + LAMBDA_ALIASES_TERRAFORM_TARGETS) # -refresch=false option to skip refresh step to avoid potential conflicts
+    subprocess.check_call(['terraform', 'apply', '-auto-approve'])
 
 '''---------------'''
 
