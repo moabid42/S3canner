@@ -27,7 +27,7 @@ TERRAFORM_DIR = os.path.join(PROJ_DIR, 'terraform')
 TERRAFORM_CONFIG = os.path.join(TERRAFORM_DIR, 'terraform.tfvars')
 
 # Analyzer Lambda function source and zip package
-ANALYZE_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'core', 'lambda_functions', 'analyzer_function')
+ANALYZE_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'core', 'lambda_functions', 'analyzer_function', 'main.py')
 ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer.zip') 
 
 # Batch Lambda function source and zip package
@@ -74,6 +74,9 @@ def build_dispatcher_():
 
 def build_analyser_():
     # Build the YARA analyser Lambda deplyment package
+    print('Creating analyzer deploy package...')
+    with zipfile.ZipFile(ANALYZE_LAMBDA_PACKAGE, 'w') as pkg:
+        pkg.write(ANALYZE_LAMBDA_SOURCE, os.path.basename(ANALYZE_LAMBDA_SOURCE))
     return
 
 def build() -> None:
@@ -88,18 +91,20 @@ def apply() -> None:
     
     # VAlidate the format
     os.chdir(TERRAFORM_DIR)
-    subprocess.check_call(['terraform', 'validate'])
-    subprocess.check_call(['terraform', 'fmt'])
-
+    
     # Setup the backend if needed and reload modules ?
     subprocess.check_call(['terraform', 'init'])
 
+    # subprocess.check_call(['terraform', 'validate'])
+    # subprocess.check_call(['terraform', 'fmt'])
+    subprocess.check_call(['terraform', 'plan'])
+
     # APPLY
-    subprocess.check_call(['terraform', 'apply'])
+    subprocess.check_call(['terraform', 'apply', '-auto-approve'])
 
     # Second apply to update the lambda aliases still needed
-    subprocess.check_call(
-        ['terraform', 'apply', '-refresh=false'] + LAMBDA_ALIASES_TERRAFORM_TARGETS) # -refresch=false option to skip refresh step to avoid potential conflicts
+    # subprocess.check_call(
+    #     ['terraform', 'apply', '-refresh=false'] + LAMBDA_ALIASES_TERRAFORM_TARGETS) # -refresch=false option to skip refresh step to avoid potential conflicts
 
 '''---------------'''
 

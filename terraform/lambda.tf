@@ -31,6 +31,26 @@ module "objalert_batcher" {
   tagged_name        = var.tagged_name
 }
 
+resource "aws_lambda_permission" "allow_s3_trigger" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = module.objalert_batcher.function_arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.objalert_binaries.arn
+}
+
+# Notfiy the lambda function
+resource "aws_s3_bucket_notification" "lambda_bucket_notification" {
+  bucket = aws_s3_bucket.objalert_binaries.id
+
+  lambda_function {
+    lambda_function_arn = module.objalert_batcher.function_arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = ""
+    filter_suffix       = ""
+  }
+}
+
 // Create the dispatching Lambda function.
 module "objalert_dispatcher" {
   source          = "./modules/lambda"
@@ -55,14 +75,14 @@ module "objalert_dispatcher" {
 }
 
 // Allow dispatcher to be invoked via a CloudWatch rule.3
-resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
-  statement_id  = "AllowExecutionFromCloudWatch_${module.objalert_dispatcher.function_name}"
-  action        = "lambda:InvokeFunction"
-  function_name = module.objalert_dispatcher.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
-  qualifier     = module.objalert_dispatcher.alias_name
-}
+# resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
+#   statement_id  = "AllowExecutionFromCloudWatch_${module.objalert_dispatcher.function_name}"
+#   action        = "lambda:InvokeFunction"
+#   function_name = module.objalert_dispatcher.function_name
+#   principal     = "events.amazonaws.com"
+#   source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
+#   qualifier     = module.objalert_dispatcher.alias_name
+# }
 
 // Create the analyzer Lambda function.
 module "objalert_analyzer" {

@@ -1,0 +1,1761 @@
+# data.aws_iam_policy_document.base_policy:
+data "aws_iam_policy_document" "base_policy" {
+    id      = "3013719987"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = [
+                        "logs:PutLogEvents",
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "cloudwatch:PutMetricData",
+                    ]
+                    Effect   = "Allow"
+                    Resource = "*"
+                    Sid      = "EnableLogsAndMetrics"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "cloudwatch:PutMetricData",
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "*",
+        ]
+        sid           = "EnableLogsAndMetrics"
+    }
+}
+
+# data.aws_iam_policy_document.objalert_analyzer_policy:
+data "aws_iam_policy_document" "objalert_analyzer_policy" {
+    id      = "3396666421"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = [
+                        "dynamodb:UpdateItem",
+                        "dynamodb:Query",
+                        "dynamodb:PutItem",
+                    ]
+                    Effect   = "Allow"
+                    Resource = "arn:aws:dynamodb:eu-central-1:375140005095:table/hg_objalert_matches"
+                    Sid      = "QueryAndUpdateDynamo"
+                },
+                {
+                    Action   = "s3:GetObject"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:s3:::hg.objalert-binaries.eu-central-1/*"
+                    Sid      = "GetFromObjAlertBucket"
+                },
+                {
+                    Action   = "sns:Publish"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+                    Sid      = "PublishAlertsToSNS"
+                },
+                {
+                    Action   = "sqs:DeleteMessage"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid      = "DeleteSQSMessages"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "dynamodb:PutItem",
+            "dynamodb:Query",
+            "dynamodb:UpdateItem",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:dynamodb:eu-central-1:375140005095:table/hg_objalert_matches",
+        ]
+        sid           = "QueryAndUpdateDynamo"
+    }
+    statement {
+        actions       = [
+            "s3:GetObject",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:s3:::hg.objalert-binaries.eu-central-1/*",
+        ]
+        sid           = "GetFromObjAlertBucket"
+    }
+    statement {
+        actions       = [
+            "sns:Publish",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts",
+        ]
+        sid           = "PublishAlertsToSNS"
+    }
+    statement {
+        actions       = [
+            "sqs:DeleteMessage",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue",
+        ]
+        sid           = "DeleteSQSMessages"
+    }
+}
+
+# data.aws_iam_policy_document.objalert_batcher_policy:
+data "aws_iam_policy_document" "objalert_batcher_policy" {
+    id      = "1757438080"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = "lambda:InvokeFunction"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher"
+                    Sid      = "InvokeObjAlertBatcher"
+                },
+                {
+                    Action   = "s3:ListBucket"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+                    Sid      = "ListObjAlertBucket"
+                },
+                {
+                    Action   = "sqs:SendMessage*"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid      = "SendMessageToSQS"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "lambda:InvokeFunction",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher",
+        ]
+        sid           = "InvokeObjAlertBatcher"
+    }
+    statement {
+        actions       = [
+            "s3:ListBucket",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:s3:::hg.objalert-binaries.eu-central-1",
+        ]
+        sid           = "ListObjAlertBucket"
+    }
+    statement {
+        actions       = [
+            "sqs:SendMessage*",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue",
+        ]
+        sid           = "SendMessageToSQS"
+    }
+}
+
+# data.aws_iam_policy_document.objalert_dispatcher_policy:
+data "aws_iam_policy_document" "objalert_dispatcher_policy" {
+    id      = "815314131"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = "lambda:InvokeFunction"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer"
+                    Sid      = "InvokeObjAlertAnalyzer"
+                },
+                {
+                    Action   = [
+                        "sqs:ReceiveMessage",
+                        "sqs:DeleteMessage",
+                    ]
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid      = "ProcessSQSMessages"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "lambda:InvokeFunction",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer",
+        ]
+        sid           = "InvokeObjAlertAnalyzer"
+    }
+    statement {
+        actions       = [
+            "sqs:DeleteMessage",
+            "sqs:ReceiveMessage",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue",
+        ]
+        sid           = "ProcessSQSMessages"
+    }
+}
+
+# data.aws_iam_policy_document.s3_object_queue_policy:
+data "aws_iam_policy_document" "s3_object_queue_policy" {
+    id      = "826639504"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sqs:SendMessage"
+                    Condition = {
+                        ArnEquals = {
+                            "aws:SourceArn" = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+                        }
+                    }
+                    Effect    = "Allow"
+                    Principal = {
+                        AWS = "*"
+                    }
+                    Resource  = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid       = "AllowObjAlertBucketToNotifySQS"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "sqs:SendMessage",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = [
+            "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue",
+        ]
+        sid           = "AllowObjAlertBucketToNotifySQS"
+
+        condition {
+            test     = "ArnEquals"
+            values   = [
+                "arn:aws:s3:::hg.objalert-binaries.eu-central-1",
+            ]
+            variable = "aws:SourceArn"
+        }
+
+        principals {
+            identifiers = [
+                "*",
+            ]
+            type        = "AWS"
+        }
+    }
+}
+
+# aws_cloudwatch_event_rule.dispatch_cronjob:
+resource "aws_cloudwatch_event_rule" "dispatch_cronjob" {
+    arn                 = "arn:aws:events:eu-central-1:375140005095:rule/hg_objalert_dispatch_cronjob"
+    description         = "Regularly executes the ObjAlert dispatcher Lambda function."
+    event_bus_name      = "default"
+    id                  = "hg_objalert_dispatch_cronjob"
+    is_enabled          = true
+    name                = "hg_objalert_dispatch_cronjob"
+    schedule_expression = "rate(1 minute)"
+    tags                = {}
+    tags_all            = {}
+}
+
+# aws_cloudwatch_event_target.invoke_dispatch_lambda:
+resource "aws_cloudwatch_event_target" "invoke_dispatch_lambda" {
+    arn            = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher:Production"
+    event_bus_name = "default"
+    id             = "hg_objalert_dispatch_cronjob-hg_objalert_dispatch_to_lambda"
+    rule           = "hg_objalert_dispatch_cronjob"
+    target_id      = "hg_objalert_dispatch_to_lambda"
+}
+
+# aws_cloudwatch_metric_alarm.analyzed_binaries:
+resource "aws_cloudwatch_metric_alarm" "analyzed_binaries" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_analyzer is not analyzing any binaries!
+          - If any ObjAlert Lambda function was recently deployed, roll it back via the AWS console.
+          - Binaries may not be arriving in the S3 bucket.
+    EOT
+    alarm_name                = "hg_objalert_analyzer_no_analyzed_binaries"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_analyzer_no_analyzed_binaries"
+    comparison_operator       = "LessThanOrEqualToThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {}
+    evaluation_periods        = 1
+    id                        = "hg_objalert_analyzer_no_analyzed_binaries"
+    insufficient_data_actions = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    metric_name               = "AnalyzedBinaries"
+    namespace                 = "ObjAlert"
+    ok_actions                = []
+    period                    = 1800
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 0
+    treat_missing_data        = "missing"
+}
+
+# aws_cloudwatch_metric_alarm.batch_enqueue_errors:
+resource "aws_cloudwatch_metric_alarm" "batch_enqueue_errors" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_batcher failed to enqueue one or more S3 keys into the SQS queue
+        arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue.
+          - Check the batcher CloudWatch logs.
+          - SQS may be down.
+          - Once the problem has been resolved, re-execute the batcher (`manage.py analyze_all`) to analyze
+        any files which might have been missed.
+    EOT
+    alarm_name                = "hg_objalert_batcher_enqueue_errors"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_batcher_enqueue_errors"
+    comparison_operator       = "GreaterThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {}
+    evaluation_periods        = 1
+    id                        = "hg_objalert_batcher_enqueue_errors"
+    insufficient_data_actions = []
+    metric_name               = "BatchEnqueueFailures"
+    namespace                 = "ObjAlert"
+    ok_actions                = []
+    period                    = 60
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 0
+    treat_missing_data        = "missing"
+}
+
+# aws_cloudwatch_metric_alarm.dynamo_throttles:
+resource "aws_cloudwatch_metric_alarm" "dynamo_throttles" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        Read or write requests to the DynamoDB table are being throttled.
+          - Check the ReadThrottleEvents and WriteThrottleEvents Dynamo metrics to understand which
+            operation is causing throttles.
+          - If there was a recent deploy with new YARA rules, there may be more matches than Dynamo has been
+            provisioned to handle. In this case, rollback the analyzer in the AWS Console and fix the rules.
+          - If this is normal/expected behavior, increase the read capacity for the Dynamo table in the
+            ObjAlert terraform.tfvars config file.
+    EOT
+    alarm_name                = "hg_objalert_matches_throttles"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_matches_throttles"
+    comparison_operator       = "GreaterThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "TableName" = "hg_objalert_matches"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_matches_throttles"
+    insufficient_data_actions = []
+    metric_name               = "ReadThrottleEvents"
+    namespace                 = "AWS/DynamoDB"
+    ok_actions                = []
+    period                    = 60
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 0
+    treat_missing_data        = "missing"
+}
+
+# aws_cloudwatch_metric_alarm.sqs_age:
+resource "aws_cloudwatch_metric_alarm" "sqs_age" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        The queue hg_objalert_s3_object_queue is falling behind and items are growing old.
+        This can sometimes happen during a batch analysis of the entire bucket (e.g. after a deploy).
+          - If the SQS age is growing unbounded ("up and to the right"), either the analyzers are down or
+            they are unable to pull from SQS. Check the analyzer logs.
+          - If the batcher is currently running and the SQS age is relatively stable, resolve the alert and
+            consider increasing the threshold for this alert.
+    EOT
+    alarm_name                = "hg_objalert_s3_object_queue_old_age"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_s3_object_queue_old_age"
+    comparison_operator       = "GreaterThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "QueueName" = "hg_objalert_s3_object_queue"
+    }
+    evaluation_periods        = 15
+    id                        = "hg_objalert_s3_object_queue_old_age"
+    insufficient_data_actions = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    metric_name               = "ApproximateAgeOfOldestMessage"
+    namespace                 = "AWS/SQS"
+    ok_actions                = []
+    period                    = 60
+    statistic                 = "Minimum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 900
+    treat_missing_data        = "missing"
+}
+
+# aws_cloudwatch_metric_alarm.yara_rules:
+resource "aws_cloudwatch_metric_alarm" "yara_rules" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        The number of YARA rules in ObjAlert is surprisingly low.
+        Check if a recent deploy accidentally removed most YARA rules.
+    EOT
+    alarm_name                = "hg_objalert_analyzer_too_few_yara_rules"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_analyzer_too_few_yara_rules"
+    comparison_operator       = "LessThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {}
+    evaluation_periods        = 1
+    id                        = "hg_objalert_analyzer_too_few_yara_rules"
+    insufficient_data_actions = []
+    metric_name               = "YaraRules"
+    namespace                 = "ObjAlert"
+    ok_actions                = []
+    period                    = 300
+    statistic                 = "Maximum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 5
+    treat_missing_data        = "missing"
+}
+
+# aws_dynamodb_table.objalert_yara_matches:
+resource "aws_dynamodb_table" "objalert_yara_matches" {
+    arn                         = "arn:aws:dynamodb:eu-central-1:375140005095:table/hg_objalert_matches"
+    billing_mode                = "PROVISIONED"
+    deletion_protection_enabled = false
+    hash_key                    = "SHA256"
+    id                          = "hg_objalert_matches"
+    name                        = "hg_objalert_matches"
+    range_key                   = "LambdaVersion"
+    read_capacity               = 10
+    stream_enabled              = false
+    table_class                 = "STANDARD"
+    tags                        = {
+        "Name" = "ObjAlert"
+    }
+    tags_all                    = {
+        "Name" = "ObjAlert"
+    }
+    write_capacity              = 5
+
+    attribute {
+        name = "LambdaVersion"
+        type = "N"
+    }
+    attribute {
+        name = "SHA256"
+        type = "S"
+    }
+
+    point_in_time_recovery {
+        enabled = false
+    }
+
+    ttl {
+        enabled = false
+    }
+}
+
+# aws_iam_policy.base_policy:
+resource "aws_iam_policy" "base_policy" {
+    arn       = "arn:aws:iam::375140005095:policy/hg_objalert_base_policy"
+    id        = "arn:aws:iam::375140005095:policy/hg_objalert_base_policy"
+    name      = "hg_objalert_base_policy"
+    path      = "/"
+    policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = [
+                        "logs:PutLogEvents",
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "cloudwatch:PutMetricData",
+                    ]
+                    Effect   = "Allow"
+                    Resource = "*"
+                    Sid      = "EnableLogsAndMetrics"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    policy_id = "ANPAVOWAWGTTYFD4JAZ5W"
+    tags      = {}
+    tags_all  = {}
+}
+
+# aws_iam_role_policy.objalert_analyzer_policy:
+resource "aws_iam_role_policy" "objalert_analyzer_policy" {
+    id     = "hg_objalert_analyzer_role:hg_objalert_analyzer_policy"
+    name   = "hg_objalert_analyzer_policy"
+    policy = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = [
+                        "dynamodb:UpdateItem",
+                        "dynamodb:Query",
+                        "dynamodb:PutItem",
+                    ]
+                    Effect   = "Allow"
+                    Resource = "arn:aws:dynamodb:eu-central-1:375140005095:table/hg_objalert_matches"
+                    Sid      = "QueryAndUpdateDynamo"
+                },
+                {
+                    Action   = "s3:GetObject"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:s3:::hg.objalert-binaries.eu-central-1/*"
+                    Sid      = "GetFromObjAlertBucket"
+                },
+                {
+                    Action   = "sns:Publish"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+                    Sid      = "PublishAlertsToSNS"
+                },
+                {
+                    Action   = "sqs:DeleteMessage"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid      = "DeleteSQSMessages"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    role   = "hg_objalert_analyzer_role"
+}
+
+# aws_iam_role_policy.objalert_batcher_policy:
+resource "aws_iam_role_policy" "objalert_batcher_policy" {
+    id     = "hg_objalert_batcher_role:hg_objalert_batcher_policy"
+    name   = "hg_objalert_batcher_policy"
+    policy = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = "lambda:InvokeFunction"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher"
+                    Sid      = "InvokeObjAlertBatcher"
+                },
+                {
+                    Action   = "s3:ListBucket"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+                    Sid      = "ListObjAlertBucket"
+                },
+                {
+                    Action   = "sqs:SendMessage*"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid      = "SendMessageToSQS"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    role   = "hg_objalert_batcher_role"
+}
+
+# aws_iam_role_policy.objalert_dispatcher_policy:
+resource "aws_iam_role_policy" "objalert_dispatcher_policy" {
+    id     = "hg_objalert_dispatcher_role:hg_objalert_dispatcher_policy"
+    name   = "hg_objalert_dispatcher_policy"
+    policy = jsonencode(
+        {
+            Statement = [
+                {
+                    Action   = "lambda:InvokeFunction"
+                    Effect   = "Allow"
+                    Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer"
+                    Sid      = "InvokeObjAlertAnalyzer"
+                },
+                {
+                    Action   = [
+                        "sqs:ReceiveMessage",
+                        "sqs:DeleteMessage",
+                    ]
+                    Effect   = "Allow"
+                    Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid      = "ProcessSQSMessages"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    role   = "hg_objalert_dispatcher_role"
+}
+
+# aws_lambda_permission.allow_cloudwatch_to_invoke_dispatch:
+resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
+    action        = "lambda:InvokeFunction"
+    function_name = "hg_objalert_dispatcher"
+    id            = "AllowExecutionFromCloudWatch_hg_objalert_dispatcher"
+    principal     = "events.amazonaws.com"
+    qualifier     = "Production"
+    source_arn    = "arn:aws:events:eu-central-1:375140005095:rule/hg_objalert_dispatch_cronjob"
+    statement_id  = "AllowExecutionFromCloudWatch_hg_objalert_dispatcher"
+}
+
+# aws_s3_bucket.objalert_binaries:
+resource "aws_s3_bucket" "objalert_binaries" {
+    acl                         = "private"
+    arn                         = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+    bucket                      = "hg.objalert-binaries.eu-central-1"
+    bucket_domain_name          = "hg.objalert-binaries.eu-central-1.s3.amazonaws.com"
+    bucket_regional_domain_name = "hg.objalert-binaries.eu-central-1.s3.eu-central-1.amazonaws.com"
+    force_destroy               = true
+    hosted_zone_id              = "Z21DNDUVLTQW6Q"
+    id                          = "hg.objalert-binaries.eu-central-1"
+    object_lock_enabled         = false
+    region                      = "eu-central-1"
+    request_payer               = "BucketOwner"
+    tags                        = {
+        "Name" = "ObjAlert"
+    }
+    tags_all                    = {
+        "Name" = "ObjAlert"
+    }
+
+    grant {
+        id          = "7d20a3e617cca86fa9d170995afbcd1aba0ebd67788a5fb17489b449355fc588"
+        permissions = [
+            "FULL_CONTROL",
+        ]
+        type        = "CanonicalUser"
+    }
+
+    lifecycle_rule {
+        abort_incomplete_multipart_upload_days = 0
+        enabled                                = true
+        id                                     = "delete_old_versions"
+        tags                                   = {}
+
+        noncurrent_version_expiration {
+            days = 1
+        }
+    }
+
+    logging {
+        target_bucket = "hg.objalert-binaries.eu-central-1.access-logs"
+        target_prefix = "s3-access-logs/"
+    }
+
+    server_side_encryption_configuration {
+        rule {
+            bucket_key_enabled = false
+
+            apply_server_side_encryption_by_default {
+                sse_algorithm = "AES256"
+            }
+        }
+    }
+
+    versioning {
+        enabled    = true
+        mfa_delete = false
+    }
+}
+
+# aws_s3_bucket.objalert_log_bucket[0]:
+resource "aws_s3_bucket" "objalert_log_bucket" {
+    acl                         = "log-delivery-write"
+    arn                         = "arn:aws:s3:::hg.objalert-binaries.eu-central-1.access-logs"
+    bucket                      = "hg.objalert-binaries.eu-central-1.access-logs"
+    bucket_domain_name          = "hg.objalert-binaries.eu-central-1.access-logs.s3.amazonaws.com"
+    bucket_regional_domain_name = "hg.objalert-binaries.eu-central-1.access-logs.s3.eu-central-1.amazonaws.com"
+    force_destroy               = true
+    hosted_zone_id              = "Z21DNDUVLTQW6Q"
+    id                          = "hg.objalert-binaries.eu-central-1.access-logs"
+    object_lock_enabled         = false
+    region                      = "eu-central-1"
+    request_payer               = "BucketOwner"
+    tags                        = {
+        "Name" = "ObjAlert"
+    }
+    tags_all                    = {
+        "Name" = "ObjAlert"
+    }
+
+    grant {
+        permissions = [
+            "READ_ACP",
+            "WRITE",
+        ]
+        type        = "Group"
+        uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+    }
+    grant {
+        id          = "7d20a3e617cca86fa9d170995afbcd1aba0ebd67788a5fb17489b449355fc588"
+        permissions = [
+            "FULL_CONTROL",
+        ]
+        type        = "CanonicalUser"
+    }
+
+    lifecycle_rule {
+        abort_incomplete_multipart_upload_days = 0
+        enabled                                = true
+        id                                     = "log_expiration"
+        tags                                   = {}
+
+        expiration {
+            days                         = 60
+            expired_object_delete_marker = false
+        }
+
+        noncurrent_version_expiration {
+            days = 1
+        }
+
+        transition {
+            days          = 30
+            storage_class = "STANDARD_IA"
+        }
+    }
+
+    logging {
+        target_bucket = "hg.objalert-binaries.eu-central-1.access-logs"
+        target_prefix = "self/"
+    }
+
+    server_side_encryption_configuration {
+        rule {
+            bucket_key_enabled = false
+
+            apply_server_side_encryption_by_default {
+                sse_algorithm = "AES256"
+            }
+        }
+    }
+
+    versioning {
+        enabled    = true
+        mfa_delete = false
+    }
+}
+
+# aws_s3_bucket_notification.bucket_notification:
+resource "aws_s3_bucket_notification" "bucket_notification" {
+    bucket      = "hg.objalert-binaries.eu-central-1"
+    eventbridge = false
+    id          = "hg.objalert-binaries.eu-central-1"
+
+    queue {
+        events    = [
+            "s3:ObjectCreated:*",
+        ]
+        id        = "tf-s3-queue-20230331103845718600000004"
+        queue_arn = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+    }
+}
+
+# aws_s3_bucket_public_access_block.block_objalert_binaries_bucket:
+resource "aws_s3_bucket_public_access_block" "block_objalert_binaries_bucket" {
+    block_public_acls       = true
+    block_public_policy     = true
+    bucket                  = "hg.objalert-binaries.eu-central-1"
+    id                      = "hg.objalert-binaries.eu-central-1"
+    ignore_public_acls      = true
+    restrict_public_buckets = true
+}
+
+# aws_s3_bucket_public_access_block.block_objalert_log_bucket:
+resource "aws_s3_bucket_public_access_block" "block_objalert_log_bucket" {
+    block_public_acls       = true
+    block_public_policy     = true
+    bucket                  = "hg.objalert-binaries.eu-central-1.access-logs"
+    id                      = "hg.objalert-binaries.eu-central-1.access-logs"
+    ignore_public_acls      = true
+    restrict_public_buckets = true
+}
+
+# aws_sns_topic.metric_alarms:
+resource "aws_sns_topic" "metric_alarms" {
+    application_success_feedback_sample_rate = 0
+    arn                                      = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms"
+    content_based_deduplication              = false
+    fifo_topic                               = false
+    firehose_success_feedback_sample_rate    = 0
+    http_success_feedback_sample_rate        = 0
+    id                                       = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms"
+    lambda_success_feedback_sample_rate      = 0
+    name                                     = "hg_objalert_metric_alarms"
+    owner                                    = "375140005095"
+    policy                                   = jsonencode(
+        {
+            Id        = "__default_policy_ID"
+            Statement = [
+                {
+                    Action    = [
+                        "SNS:GetTopicAttributes",
+                        "SNS:SetTopicAttributes",
+                        "SNS:AddPermission",
+                        "SNS:RemovePermission",
+                        "SNS:DeleteTopic",
+                        "SNS:Subscribe",
+                        "SNS:ListSubscriptionsByTopic",
+                        "SNS:Publish",
+                    ]
+                    Condition = {
+                        StringEquals = {
+                            "AWS:SourceOwner" = "375140005095"
+                        }
+                    }
+                    Effect    = "Allow"
+                    Principal = {
+                        AWS = "*"
+                    }
+                    Resource  = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms"
+                    Sid       = "__default_statement_ID"
+                },
+            ]
+            Version   = "2008-10-17"
+        }
+    )
+    signature_version                        = 0
+    sqs_success_feedback_sample_rate         = 0
+    tags                                     = {}
+    tags_all                                 = {}
+}
+
+# aws_sns_topic.yara_match_alerts:
+resource "aws_sns_topic" "yara_match_alerts" {
+    application_success_feedback_sample_rate = 0
+    arn                                      = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+    content_based_deduplication              = false
+    fifo_topic                               = false
+    firehose_success_feedback_sample_rate    = 0
+    http_success_feedback_sample_rate        = 0
+    id                                       = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+    lambda_success_feedback_sample_rate      = 0
+    name                                     = "hg_objalert_yara_match_alerts"
+    owner                                    = "375140005095"
+    policy                                   = jsonencode(
+        {
+            Id        = "__default_policy_ID"
+            Statement = [
+                {
+                    Action    = [
+                        "SNS:GetTopicAttributes",
+                        "SNS:SetTopicAttributes",
+                        "SNS:AddPermission",
+                        "SNS:RemovePermission",
+                        "SNS:DeleteTopic",
+                        "SNS:Subscribe",
+                        "SNS:ListSubscriptionsByTopic",
+                        "SNS:Publish",
+                    ]
+                    Condition = {
+                        StringEquals = {
+                            "AWS:SourceOwner" = "375140005095"
+                        }
+                    }
+                    Effect    = "Allow"
+                    Principal = {
+                        AWS = "*"
+                    }
+                    Resource  = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+                    Sid       = "__default_statement_ID"
+                },
+            ]
+            Version   = "2008-10-17"
+        }
+    )
+    signature_version                        = 0
+    sqs_success_feedback_sample_rate         = 0
+    tags                                     = {}
+    tags_all                                 = {}
+}
+
+# aws_sqs_queue.s3_object_queue:
+resource "aws_sqs_queue" "s3_object_queue" {
+    arn                               = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+    content_based_deduplication       = false
+    delay_seconds                     = 0
+    fifo_queue                        = false
+    id                                = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+    kms_data_key_reuse_period_seconds = 300
+    max_message_size                  = 262144
+    message_retention_seconds         = 1800
+    name                              = "hg_objalert_s3_object_queue"
+    policy                            = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sqs:SendMessage"
+                    Condition = {
+                        ArnEquals = {
+                            "aws:SourceArn" = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+                        }
+                    }
+                    Effect    = "Allow"
+                    Principal = {
+                        AWS = "*"
+                    }
+                    Resource  = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid       = "AllowObjAlertBucketToNotifySQS"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    receive_wait_time_seconds         = 0
+    sqs_managed_sse_enabled           = true
+    tags                              = {}
+    tags_all                          = {}
+    url                               = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+    visibility_timeout_seconds        = 242
+}
+
+# aws_sqs_queue_policy.s3_object_queue_policy:
+resource "aws_sqs_queue_policy" "s3_object_queue_policy" {
+    id        = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+    policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sqs:SendMessage"
+                    Condition = {
+                        ArnEquals = {
+                            "aws:SourceArn" = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+                        }
+                    }
+                    Effect    = "Allow"
+                    Principal = {
+                        AWS = "*"
+                    }
+                    Resource  = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                    Sid       = "AllowObjAlertBucketToNotifySQS"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    queue_url = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+}
+
+
+# module.objalert_analyzer.data.aws_iam_policy_document.lambda_execution_policy[0]:
+data "aws_iam_policy_document" "lambda_execution_policy" {
+    id      = "1008248811"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "lambda.amazonaws.com"
+                    }
+                    Sid       = "AllowLambdaToAssumeRole"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "sts:AssumeRole",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = []
+        sid           = "AllowLambdaToAssumeRole"
+
+        principals {
+            identifiers = [
+                "lambda.amazonaws.com",
+            ]
+            type        = "Service"
+        }
+    }
+}
+
+# module.objalert_analyzer.aws_cloudwatch_log_group.lambda_log_group[0]:
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+    arn               = "arn:aws:logs:eu-central-1:375140005095:log-group:/aws/lambda/hg_objalert_analyzer"
+    id                = "/aws/lambda/hg_objalert_analyzer"
+    name              = "/aws/lambda/hg_objalert_analyzer"
+    retention_in_days = 90
+    skip_destroy      = false
+    tags              = {
+        "Name" = "Objalert"
+    }
+    tags_all          = {
+        "Name" = "Objalert"
+    }
+}
+
+# module.objalert_analyzer.aws_cloudwatch_metric_alarm.lambda_errors[0]:
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_analyzer has a high error rate. Check the CloudWatch logs.
+        If (a) the number of errors is not growing unbounded,
+        (b) the errors are correlated with a rise in S3 download latency, and
+        (c) the batcher is currently running (e.g. after a deploy),
+        then you can resolve this alert (and consider increasing the threshold for this alarm).
+        Otherwise, there is an unknown problem with the analyzers (which may still be related to S3).
+    EOT
+    alarm_name                = "hg_objalert_analyzer_errors"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_analyzer_errors"
+    comparison_operator       = "GreaterThanOrEqualToThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "FunctionName" = "hg_objalert_analyzer"
+        "Resource"     = "hg_objalert_analyzer:Production"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_analyzer_errors"
+    insufficient_data_actions = []
+    metric_name               = "Errors"
+    namespace                 = "AWS/Lambda"
+    ok_actions                = []
+    period                    = 300
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 50
+    treat_missing_data        = "missing"
+}
+
+# module.objalert_analyzer.aws_cloudwatch_metric_alarm.lambda_throttles[0]:
+resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_analyzer is being throttled,
+        i.e. the number of concurrent Lambda invocations is exceeding your account limit in this region.
+        Lower the lamda_dispatch_limit in the ObjAlert config or request an AWS limit increase.
+    EOT
+    alarm_name                = "hg_objalert_analyzer_throttles"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_analyzer_throttles"
+    comparison_operator       = "GreaterThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "FunctionName" = "hg_objalert_analyzer"
+        "Resource"     = "hg_objalert_analyzer:Production"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_analyzer_throttles"
+    insufficient_data_actions = []
+    metric_name               = "Throttles"
+    namespace                 = "AWS/Lambda"
+    ok_actions                = []
+    period                    = 60
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 0
+    treat_missing_data        = "missing"
+}
+
+# module.objalert_analyzer.aws_iam_role.role[0]:
+resource "aws_iam_role" "role" {
+    arn                   = "arn:aws:iam::375140005095:role/hg_objalert_analyzer_role"
+    assume_role_policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "lambda.amazonaws.com"
+                    }
+                    Sid       = "AllowLambdaToAssumeRole"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    create_date           = "2023-03-31T10:37:16Z"
+    force_detach_policies = false
+    id                    = "hg_objalert_analyzer_role"
+    managed_policy_arns   = [
+        "arn:aws:iam::375140005095:policy/hg_objalert_base_policy",
+    ]
+    max_session_duration  = 3600
+    name                  = "hg_objalert_analyzer_role"
+    path                  = "/"
+    tags                  = {}
+    tags_all              = {}
+    unique_id             = "AROAVOWAWGTTURSNKKF3D"
+
+    inline_policy {
+        name   = "hg_objalert_analyzer_policy"
+        policy = jsonencode(
+            {
+                Statement = [
+                    {
+                        Action   = [
+                            "dynamodb:UpdateItem",
+                            "dynamodb:Query",
+                            "dynamodb:PutItem",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:dynamodb:eu-central-1:375140005095:table/hg_objalert_matches"
+                        Sid      = "QueryAndUpdateDynamo"
+                    },
+                    {
+                        Action   = "s3:GetObject"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:s3:::hg.objalert-binaries.eu-central-1/*"
+                        Sid      = "GetFromObjAlertBucket"
+                    },
+                    {
+                        Action   = "sns:Publish"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+                        Sid      = "PublishAlertsToSNS"
+                    },
+                    {
+                        Action   = "sqs:DeleteMessage"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                        Sid      = "DeleteSQSMessages"
+                    },
+                ]
+                Version   = "2012-10-17"
+            }
+        )
+    }
+}
+
+# module.objalert_analyzer.aws_iam_role_policy_attachment.attach_base_policy[0]:
+resource "aws_iam_role_policy_attachment" "attach_base_policy" {
+    id         = "hg_objalert_analyzer_role-20230331103719919100000002"
+    policy_arn = "arn:aws:iam::375140005095:policy/hg_objalert_base_policy"
+    role       = "hg_objalert_analyzer_role"
+}
+
+# module.objalert_analyzer.aws_lambda_alias.production_alias[0]:
+resource "aws_lambda_alias" "production_alias" {
+    arn              = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production"
+    function_name    = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer"
+    function_version = "11"
+    id               = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production"
+    invoke_arn       = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production/invocations"
+    name             = "Production"
+}
+
+# module.objalert_analyzer.aws_lambda_function.function[0]:
+resource "aws_lambda_function" "function" {
+    architectures                  = [
+        "x86_64",
+    ]
+    arn                            = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer"
+    description                    = "Analyze a obj with a set of YARA rules"
+    filename                       = "lambda_analyzer.zip"
+    function_name                  = "hg_objalert_analyzer"
+    handler                        = "lambda_functions.analyzer.main.analyze_lambda_handler"
+    id                             = "hg_objalert_analyzer"
+    invoke_arn                     = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer/invocations"
+    last_modified                  = "2023-03-31T10:38:26.268+0000"
+    layers                         = []
+    memory_size                    = 512
+    package_type                   = "Zip"
+    publish                        = true
+    qualified_arn                  = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:11"
+    qualified_invoke_arn           = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:11/invocations"
+    reserved_concurrent_executions = -1
+    role                           = "arn:aws:iam::375140005095:role/hg_objalert_analyzer_role"
+    runtime                        = "python3.9"
+    skip_destroy                   = false
+    source_code_hash               = "du1TtdpXLiDqbAcaZHzrU6y4SU6vSwBfyDQ0hAd+3vQ="
+    source_code_size               = 181
+    tags                           = {
+        "Name" = "Objalert"
+    }
+    tags_all                       = {
+        "Name" = "Objalert"
+    }
+    timeout                        = 240
+    version                        = "11"
+
+    environment {
+        variables = {
+            "S3_BUCKET_NAME"                 = "hg.objalert-binaries.eu-central-1"
+            "SQS_QUEUE_URL"                  = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+            "YARA_ALERTS_SNS_TOPIC_ARN"      = "arn:aws:sns:eu-central-1:375140005095:hg_objalert_yara_match_alerts"
+            "YARA_MATCHES_DYNAMO_TABLE_NAME" = "hg_objalert_matches"
+        }
+    }
+
+    ephemeral_storage {
+        size = 512
+    }
+
+    tracing_config {
+        mode = "PassThrough"
+    }
+}
+
+
+# module.objalert_batcher.data.aws_iam_policy_document.lambda_execution_policy[0]:
+data "aws_iam_policy_document" "lambda_execution_policy" {
+    id      = "1008248811"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "lambda.amazonaws.com"
+                    }
+                    Sid       = "AllowLambdaToAssumeRole"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "sts:AssumeRole",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = []
+        sid           = "AllowLambdaToAssumeRole"
+
+        principals {
+            identifiers = [
+                "lambda.amazonaws.com",
+            ]
+            type        = "Service"
+        }
+    }
+}
+
+# module.objalert_batcher.aws_cloudwatch_log_group.lambda_log_group[0]:
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+    arn               = "arn:aws:logs:eu-central-1:375140005095:log-group:/aws/lambda/hg_objalert_batcher"
+    id                = "/aws/lambda/hg_objalert_batcher"
+    name              = "/aws/lambda/hg_objalert_batcher"
+    retention_in_days = 90
+    skip_destroy      = false
+    tags              = {
+        "Name" = "Objalert"
+    }
+    tags_all          = {
+        "Name" = "Objalert"
+    }
+}
+
+# module.objalert_batcher.aws_cloudwatch_metric_alarm.lambda_errors[0]:
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_batcher has a high error rate. Check the CloudWatch logs.
+    EOT
+    alarm_name                = "hg_objalert_batcher_errors"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_batcher_errors"
+    comparison_operator       = "GreaterThanOrEqualToThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "FunctionName" = "hg_objalert_batcher"
+        "Resource"     = "hg_objalert_batcher:Production"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_batcher_errors"
+    insufficient_data_actions = []
+    metric_name               = "Errors"
+    namespace                 = "AWS/Lambda"
+    ok_actions                = []
+    period                    = 300
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 250
+    treat_missing_data        = "missing"
+}
+
+# module.objalert_batcher.aws_cloudwatch_metric_alarm.lambda_throttles[0]:
+resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_batcher is being throttled,
+        i.e. the number of concurrent Lambda invocations is exceeding your account limit in this region.
+        Lower the lamda_dispatch_limit in the ObjAlert config or request an AWS limit increase.
+    EOT
+    alarm_name                = "hg_objalert_batcher_throttles"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_batcher_throttles"
+    comparison_operator       = "GreaterThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "FunctionName" = "hg_objalert_batcher"
+        "Resource"     = "hg_objalert_batcher:Production"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_batcher_throttles"
+    insufficient_data_actions = []
+    metric_name               = "Throttles"
+    namespace                 = "AWS/Lambda"
+    ok_actions                = []
+    period                    = 60
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 0
+    treat_missing_data        = "missing"
+}
+
+# module.objalert_batcher.aws_iam_role.role[0]:
+resource "aws_iam_role" "role" {
+    arn                   = "arn:aws:iam::375140005095:role/hg_objalert_batcher_role"
+    assume_role_policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "lambda.amazonaws.com"
+                    }
+                    Sid       = "AllowLambdaToAssumeRole"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    create_date           = "2023-03-31T10:37:16Z"
+    force_detach_policies = false
+    id                    = "hg_objalert_batcher_role"
+    managed_policy_arns   = [
+        "arn:aws:iam::375140005095:policy/hg_objalert_base_policy",
+    ]
+    max_session_duration  = 3600
+    name                  = "hg_objalert_batcher_role"
+    path                  = "/"
+    tags                  = {}
+    tags_all              = {}
+    unique_id             = "AROAVOWAWGTTTIN7ZATJ6"
+
+    inline_policy {
+        name   = "hg_objalert_batcher_policy"
+        policy = jsonencode(
+            {
+                Statement = [
+                    {
+                        Action   = "lambda:InvokeFunction"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher"
+                        Sid      = "InvokeObjAlertBatcher"
+                    },
+                    {
+                        Action   = "s3:ListBucket"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:s3:::hg.objalert-binaries.eu-central-1"
+                        Sid      = "ListObjAlertBucket"
+                    },
+                    {
+                        Action   = "sqs:SendMessage*"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                        Sid      = "SendMessageToSQS"
+                    },
+                ]
+                Version   = "2012-10-17"
+            }
+        )
+    }
+}
+
+# module.objalert_batcher.aws_iam_role_policy_attachment.attach_base_policy[0]:
+resource "aws_iam_role_policy_attachment" "attach_base_policy" {
+    id         = "hg_objalert_batcher_role-20230331103718928700000001"
+    policy_arn = "arn:aws:iam::375140005095:policy/hg_objalert_base_policy"
+    role       = "hg_objalert_batcher_role"
+}
+
+# module.objalert_batcher.aws_lambda_alias.production_alias[0]:
+resource "aws_lambda_alias" "production_alias" {
+    arn              = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher:Production"
+    function_name    = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher"
+    function_version = "12"
+    id               = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher:Production"
+    invoke_arn       = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher:Production/invocations"
+    name             = "Production"
+}
+
+# module.objalert_batcher.aws_lambda_function.function[0]:
+resource "aws_lambda_function" "function" {
+    architectures                  = [
+        "x86_64",
+    ]
+    arn                            = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher"
+    description                    = "Enqueues all S3 objects into SQS for re-analysis"
+    filename                       = "lambda_batcher.zip"
+    function_name                  = "hg_objalert_batcher"
+    handler                        = "lambda_functions.batcher.main.batch_lambda_handler"
+    id                             = "hg_objalert_batcher"
+    invoke_arn                     = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher/invocations"
+    last_modified                  = "2023-03-31T10:38:20.439+0000"
+    layers                         = []
+    memory_size                    = 128
+    package_type                   = "Zip"
+    publish                        = true
+    qualified_arn                  = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher:12"
+    qualified_invoke_arn           = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_batcher:12/invocations"
+    reserved_concurrent_executions = -1
+    role                           = "arn:aws:iam::375140005095:role/hg_objalert_batcher_role"
+    runtime                        = "python3.9"
+    skip_destroy                   = false
+    source_code_hash               = "R52yuzxhecyxfLCdwT+01yeTjGYxf7sxfb9Ye1rXOM8="
+    source_code_size               = 6814
+    tags                           = {
+        "Name" = "Objalert"
+    }
+    tags_all                       = {
+        "Name" = "Objalert"
+    }
+    timeout                        = 300
+    version                        = "12"
+
+    environment {
+        variables = {
+            "BATCH_LAMBDA_NAME"      = "hg_objalert_batcher"
+            "BATCH_LAMBDA_QUALIFIER" = "Production"
+            "OBJECTS_PER_MESSAGE"    = "20"
+            "S3_BUCKET_NAME"         = "hg.objalert-binaries.eu-central-1"
+            "SQS_QUEUE_URL"          = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+        }
+    }
+
+    ephemeral_storage {
+        size = 512
+    }
+
+    tracing_config {
+        mode = "PassThrough"
+    }
+}
+
+
+# module.objalert_dispatcher.data.aws_iam_policy_document.lambda_execution_policy[0]:
+data "aws_iam_policy_document" "lambda_execution_policy" {
+    id      = "1008248811"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "lambda.amazonaws.com"
+                    }
+                    Sid       = "AllowLambdaToAssumeRole"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "sts:AssumeRole",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = []
+        sid           = "AllowLambdaToAssumeRole"
+
+        principals {
+            identifiers = [
+                "lambda.amazonaws.com",
+            ]
+            type        = "Service"
+        }
+    }
+}
+
+# module.objalert_dispatcher.aws_cloudwatch_metric_alarm.lambda_errors[0]:
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_dispatcher has a high error rate. Check the CloudWatch logs.
+    EOT
+    alarm_name                = "hg_objalert_dispatcher_errors"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_dispatcher_errors"
+    comparison_operator       = "GreaterThanOrEqualToThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "FunctionName" = "hg_objalert_dispatcher"
+        "Resource"     = "hg_objalert_dispatcher:Production"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_dispatcher_errors"
+    insufficient_data_actions = []
+    metric_name               = "Errors"
+    namespace                 = "AWS/Lambda"
+    ok_actions                = []
+    period                    = 300
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 250
+    treat_missing_data        = "missing"
+}
+
+# module.objalert_dispatcher.aws_cloudwatch_metric_alarm.lambda_throttles[0]:
+resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
+    actions_enabled           = true
+    alarm_actions             = [
+        "arn:aws:sns:eu-central-1:375140005095:hg_objalert_metric_alarms",
+    ]
+    alarm_description         = <<-EOT
+        hg_objalert_dispatcher is being throttled,
+        i.e. the number of concurrent Lambda invocations is exceeding your account limit in this region.
+        Lower the lamda_dispatch_limit in the ObjAlert config or request an AWS limit increase.
+    EOT
+    alarm_name                = "hg_objalert_dispatcher_throttles"
+    arn                       = "arn:aws:cloudwatch:eu-central-1:375140005095:alarm:hg_objalert_dispatcher_throttles"
+    comparison_operator       = "GreaterThanThreshold"
+    datapoints_to_alarm       = 0
+    dimensions                = {
+        "FunctionName" = "hg_objalert_dispatcher"
+        "Resource"     = "hg_objalert_dispatcher:Production"
+    }
+    evaluation_periods        = 1
+    id                        = "hg_objalert_dispatcher_throttles"
+    insufficient_data_actions = []
+    metric_name               = "Throttles"
+    namespace                 = "AWS/Lambda"
+    ok_actions                = []
+    period                    = 60
+    statistic                 = "Sum"
+    tags                      = {}
+    tags_all                  = {}
+    threshold                 = 0
+    treat_missing_data        = "missing"
+}
+
+# module.objalert_dispatcher.aws_iam_role.role[0]:
+resource "aws_iam_role" "role" {
+    arn                   = "arn:aws:iam::375140005095:role/hg_objalert_dispatcher_role"
+    assume_role_policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "lambda.amazonaws.com"
+                    }
+                    Sid       = "AllowLambdaToAssumeRole"
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    create_date           = "2023-03-31T10:37:19Z"
+    force_detach_policies = false
+    id                    = "hg_objalert_dispatcher_role"
+    managed_policy_arns   = [
+        "arn:aws:iam::375140005095:policy/hg_objalert_base_policy",
+    ]
+    max_session_duration  = 3600
+    name                  = "hg_objalert_dispatcher_role"
+    path                  = "/"
+    tags                  = {}
+    tags_all              = {}
+    unique_id             = "AROAVOWAWGTT4ICHTA55V"
+
+    inline_policy {
+        name   = "hg_objalert_dispatcher_policy"
+        policy = jsonencode(
+            {
+                Statement = [
+                    {
+                        Action   = "lambda:InvokeFunction"
+                        Effect   = "Allow"
+                        Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer"
+                        Sid      = "InvokeObjAlertAnalyzer"
+                    },
+                    {
+                        Action   = [
+                            "sqs:ReceiveMessage",
+                            "sqs:DeleteMessage",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:sqs:eu-central-1:375140005095:hg_objalert_s3_object_queue"
+                        Sid      = "ProcessSQSMessages"
+                    },
+                ]
+                Version   = "2012-10-17"
+            }
+        )
+    }
+}
+
+# module.objalert_dispatcher.aws_iam_role_policy_attachment.attach_base_policy[0]:
+resource "aws_iam_role_policy_attachment" "attach_base_policy" {
+    id         = "hg_objalert_dispatcher_role-20230331103720612600000003"
+    policy_arn = "arn:aws:iam::375140005095:policy/hg_objalert_base_policy"
+    role       = "hg_objalert_dispatcher_role"
+}
+
+# module.objalert_dispatcher.aws_lambda_alias.production_alias[0]:
+resource "aws_lambda_alias" "production_alias" {
+    arn              = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher:Production"
+    function_name    = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher"
+    function_version = "11"
+    id               = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher:Production"
+    invoke_arn       = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher:Production/invocations"
+    name             = "Production"
+}
+
+# module.objalert_dispatcher.aws_lambda_function.function[0]:
+resource "aws_lambda_function" "function" {
+    architectures                  = [
+        "x86_64",
+    ]
+    arn                            = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher"
+    description                    = "Poll SQS events and fire them off to analyzers"
+    filename                       = "lambda_dispatcher.zip"
+    function_name                  = "hg_objalert_dispatcher"
+    handler                        = "lambda_functions.dispatcher.main.dispatch_lambda_handler"
+    id                             = "hg_objalert_dispatcher"
+    invoke_arn                     = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher/invocations"
+    last_modified                  = "2023-03-31T10:38:32.341+0000"
+    layers                         = []
+    memory_size                    = 128
+    package_type                   = "Zip"
+    publish                        = true
+    qualified_arn                  = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher:11"
+    qualified_invoke_arn           = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_dispatcher:11/invocations"
+    reserved_concurrent_executions = -1
+    role                           = "arn:aws:iam::375140005095:role/hg_objalert_dispatcher_role"
+    runtime                        = "python3.9"
+    skip_destroy                   = false
+    source_code_hash               = "u6//c4bjAsS4qdrGbM5fWJx9AiwI3eNd7lLR86dXMvI="
+    source_code_size               = 173
+    tags                           = {
+        "Name" = "Objalert"
+    }
+    tags_all                       = {
+        "Name" = "Objalert"
+    }
+    timeout                        = 40
+    version                        = "11"
+
+    environment {
+        variables = {
+            "ANALYZE_LAMBDA_NAME"      = "hg_objalert_analyzer"
+            "ANALYZE_LAMBDA_QUALIFIER" = "Production"
+            "MAX_DISPATCHES"           = "50"
+            "SQS_QUEUE_URL"            = "https://sqs.eu-central-1.amazonaws.com/375140005095/hg_objalert_s3_object_queue"
+        }
+    }
+
+    ephemeral_storage {
+        size = 512
+    }
+
+    tracing_config {
+        mode = "PassThrough"
+    }
+}

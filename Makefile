@@ -1,4 +1,4 @@
-BACKEND_DIR = ./terraform/remote_state
+BACKEND_DIR = ./terraform/remote-state
 TERRAFORM_ROOT = ./terraform
 
 GREEN	=\033[32m
@@ -39,8 +39,8 @@ require:
 
 terraform: backend
 	terraform -chdir=$(TERRAFORM_ROOT) init
-	terraform -chdir=$(TERRAFORM_ROOT) plan -out=tfplane
-	terraform -chdir=$(TERRAFORM_ROOT) apply tfplane
+	terraform -chdir=$(TERRAFORM_ROOT) plan -out=tfplane "1-lock=false"
+	terraform -chdir=$(TERRAFORM_ROOT) apply -auto-approve "-lock=false" tfplane
 
 backend:
 	terraform -chdir=$(BACKEND_DIR) init && \
@@ -55,6 +55,7 @@ help:
 	@echo 'make destroy          Destroy and delete all the resources'
 
 destroy:
-	terraform -chdir=$(TERRAFORM_ROOT) destroy
+	@terraform -chdir=$(TERRAFORM_ROOT) destroy
+	@rm .terraform* err* *.zip *.tfstate tfplane
 
 .PHONY: all deploy test build apply require terraform backend flcean

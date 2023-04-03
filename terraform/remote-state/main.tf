@@ -7,9 +7,13 @@ provider "aws" {
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "objalert-tfstate"
      
-  lifecycle {
-    prevent_destroy = true
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
+  versioning {
+    enabled = true
   }
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "terraform_state" {

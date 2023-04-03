@@ -31,7 +31,7 @@ resource "aws_iam_role_policy_attachment" "attach_base_policy" {
 // Create the Lambda log group.
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   count             = var.enabled
-  name              = "/aws/lambda/${var.function_name}"
+  name              = "/aws/lambda/${var.function_name}1"
   retention_in_days = var.log_retention_days
 
   tags = {

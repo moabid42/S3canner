@@ -21,7 +21,7 @@
 resource "aws_s3_bucket" "objalert_log_bucket" {
   count = var.s3_log_bucket == "" ? 1 : 0 // Create only if no pre-existing log bucket.
 
-  bucket = format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
+  bucket = format("%s.objalert-binaries.%s.access-logs", var.name_prefix, var.aws_region)
   acl    = "log-delivery-write"
 
   // Everything in the log bucket rotates to infrequent access and expires.
@@ -48,7 +48,7 @@ resource "aws_s3_bucket" "objalert_log_bucket" {
   // Enable logging on the logging bucket itself.
   logging {
     // The target bucket is the same as the name of this bucket.
-    target_bucket = format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
+    target_bucket = format("%s.objalert-binaries.%s.access-logs", var.name_prefix, var.aws_region)
     target_prefix = "self/"
   }
 
@@ -60,11 +60,13 @@ resource "aws_s3_bucket" "objalert_log_bucket" {
   versioning {
     enabled = true
   }
+
+  force_destroy = true
 }
 
 // Source S3 bucket: binaries uploaded here will be automatically analyzed.
 resource "aws_s3_bucket" "objalert_binaries" {
-  bucket = "${replace(var.name_prefix, "_", ".")}.objalert-binaries.${var.aws_region}"
+  bucket = "${var.name_prefix}.objalert-binaries.${var.aws_region}"
   acl    = "private"
 
   logging {
@@ -96,6 +98,7 @@ resource "aws_s3_bucket" "objalert_binaries" {
   versioning {
     enabled = true
   }
+  force_destroy = true
 }
 
 // Blocking public access to S3 buckets
