@@ -95,16 +95,16 @@ def apply() -> None:
     # Setup the backend if needed and reload modules ?
     subprocess.check_call(['terraform', 'init'])
 
-    # subprocess.check_call(['terraform', 'validate'])
-    # subprocess.check_call(['terraform', 'fmt'])
-    subprocess.check_call(['terraform', 'plan'])
+    subprocess.check_call(['terraform', 'validate'])
+    subprocess.check_call(['terraform', 'fmt'])
+    # subprocess.check_call(['terraform', 'plan'])
 
     # APPLY
     subprocess.check_call(['terraform', 'apply', '-auto-approve'])
 
     # Second apply to update the lambda aliases still needed
-    # subprocess.check_call(
-    #     ['terraform', 'apply', '-refresh=false'] + LAMBDA_ALIASES_TERRAFORM_TARGETS) # -refresch=false option to skip refresh step to avoid potential conflicts
+    subprocess.check_call(
+        ['terraform', 'apply', '-refresh=false'] + LAMBDA_ALIASES_TERRAFORM_TARGETS) # -refresch=false option to skip refresh step to avoid potential conflicts
 
 '''---------------'''
 

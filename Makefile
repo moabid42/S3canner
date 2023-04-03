@@ -56,6 +56,8 @@ help:
 
 destroy:
 	@terraform -chdir=$(TERRAFORM_ROOT) destroy
-	@rm .terraform* err* *.zip *.tfstate tfplane
+
+rm-remote:
+	@terraform -chdir=$(BACKEND_DIR) destroy
 
 .PHONY: all deploy test build apply require terraform backend flcean
