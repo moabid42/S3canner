@@ -75,14 +75,14 @@ module "objalert_dispatcher" {
 }
 
 // Allow dispatcher to be invoked via a CloudWatch rule.3
-# resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
-#   statement_id  = "AllowExecutionFromCloudWatch_${module.objalert_dispatcher.function_name}"
-#   action        = "lambda:InvokeFunction"
-#   function_name = module.objalert_dispatcher.function_name
-#   principal     = "events.amazonaws.com"
-#   source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
-#   qualifier     = module.objalert_dispatcher.alias_name
-# }
+resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
+  statement_id  = "AllowExecutionFromCloudWatch_${module.objalert_dispatcher.function_name}"
+  action        = "lambda:InvokeFunction"
+  function_name = module.objalert_dispatcher.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
+  qualifier     = module.objalert_dispatcher.alias_name
+}
 
 // Create the analyzer Lambda function.
 module "objalert_analyzer" {
