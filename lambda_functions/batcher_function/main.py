@@ -67,7 +67,7 @@ class SQSBatcher:
         # Group keys into messages and make a single batch request
         LOGGER.info('Sending SQS batch of %d keys: %s ... %s',
                     sum(msg.num_keys for msg in self._messages), self._first_key, self._last_key)
-        sqs_entries = [msg.sqs_entry() for msg in self._messages if msg.num_keys > 0]
+        sqs_entries = [msg.to_dict() for msg in self._messages if msg.num_keys > 0]
         response = boto3.client('sqs').send_message_batch(
             QueueUrl=self.queue_url_,
             Entries=sqs_entries
@@ -123,42 +123,38 @@ class S3BucketEnumerator:
     # Get the next page of S3 objects.
     def get_keys_list(self) -> List[str]:
         try:
-            while True:
-                if self.continuation_token:
-                    response = boto3.client('s3').list_objects_v2(
-                        Bucket=self.bucket_name, ContinuationToken=self.continuation_token)
-                else:
-                    response = boto3.client('s3').list_objects_v2(Bucket=self.bucket_name)
+            if self.continuation_token:
+                response = S3_CLIENT.list_objects_v2(
+                    Bucket=self.bucket_name, ContinuationToken=self.continuation_token)
+            else:
+                response = S3_CLIENT.list_objects_v2(Bucket=self.bucket_name)
 
-                self.continuation_token = response.get('NextContinuationToken')
-                if not response['IsTruncated']:
-                    self.continuation_token = None
+            self.continuation_token = response.get('NextContinuationToken')
+            if not response['IsTruncated']:
+                self.finished = True
 
-                for obj in response['Contents']:
-                    self.keys.append(obj['Key'])
-
-                if not self.continuation_token:
-                    return self.keys
-        
+            return [obj['Key'] for obj in response['Contents']]
         except ClientError as e:
             raise Exception(f"Failed to list objects in bucket {self.bucket_name}: {e}") from e
 
 
 def batch_lambda_handler(event, lambda_context):
     LOGGER.info('Invoked with event %s', json.dumps(event))
+    LOGGER.info('The continuation token is %s', event.get('S3ContinuationToken'))
     s3_enumerator = S3BucketEnumerator(
         os.environ['S3_BUCKET_NAME'], event.get('S3ContinuationToken'))
     sqs_batcher = SQSBatcher(os.environ['SQS_QUEUE_URL'], int(os.environ['OBJECTS_PER_MESSAGE']))
 
     # As long as there are at least 10 seconds remaining, enumerate S3 objects into SQS.
     num_keys = 0
-    while lambda_context.get_remaining_time_in_millis() > 10000 and s3_enumerator.continuation_token is not None:
-        keys = s3_enumerator.get_keys_generator()
+    LOGGER.info('The remaining time is %d and %s', lambda_context.get_remaining_time_in_millis(), s3_enumerator.continuation_token)
+    while lambda_context.get_remaining_time_in_millis() > 10000 and s3_enumerator.continuation_token is None:
+        keys = s3_enumerator.get_keys_list()
         num_keys += len(keys)
         for key in keys:
             sqs_batcher.add_key(key)
     
-    LOGGE.info('Enumerated %d keys into %d batches', num_keys, sqs_batcher._msg_index)
+    LOGGER.info('Enumerated %d keys into %d batches', num_keys, sqs_batcher._msg_index)
 
     # Send the last batch of keys.
     sqs_batcher.flush()
