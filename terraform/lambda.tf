@@ -72,6 +72,85 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
   qualifier     = module.objalert_dispatcher.alias_name
 }
 
+# // Allow dispatcher to invoke analyzer
+# resource "aws_iam_policy" "allow_invoke_analyzer" {
+#   name_prefix = "allow_invoke_analyzer_"
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect   = "Allow"
+#         Action   = "lambda:InvokeFunction"
+#         Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production"
+#       }
+#     ]
+#   })
+# }
+
+# resource "aws_iam_role_policy_attachment" "allow_invoke_analyzer" {
+#   policy_arn = aws_iam_policy.allow_invoke_analyzer.arn
+#   role       = "hg_objalert_dispatcher_role"
+# }
+
+# // Allow sqs to get attributes to get the number of messages 
+# resource "aws_iam_role_policy" "lambda_sqs_policy" {
+#   name   = "lambda_sqs_policy"
+#   role   = aws_iam_role.lambda_role.id
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect   = "Allow"
+#         Action   = [
+#           "sqs:GetQueueAttributes",
+#           "sqs:SendMessage"
+#         ]
+#         Resource = "arn:aws:sqs:eu-central-1:*:*"
+#         Condition = {
+#           StringEquals = {
+#             "aws:SourceArn": aws_lambda_function.lambda_function.arn
+#           }
+#         }
+#       },
+#     ]
+#   })
+# }
+
+# resource "aws_iam_role_policy_attachment" "lambda_sqs_policy_attachment" {
+#   policy_arn = aws_iam_role_policy.lambda_sqs_policy.arn
+#   role       = aws_iam_role.lambda_role.name
+# }
+
+resource "aws_iam_policy" "lambda_policy" {
+  name_prefix = "lambda_policy_"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "lambda:InvokeFunction"
+        Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:GetQueueAttributes",
+          "sqs:SendMessage"
+        ]
+        Resource = "arn:aws:sqs:eu-central-1:*:*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  policy_arn = aws_iam_policy.lambda_policy.arn
+  role       = "hg_objalert_dispatcher_role"
+}
+
 // Create the analyzer Lambda function.
 module "objalert_analyzer" {
   source          = "./modules/lambda"

@@ -3,3 +3,4 @@ pyfakefs
 pyhcl
 pylint
 yara-python==3.6.3
+python-dotenv

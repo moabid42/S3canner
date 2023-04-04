@@ -3,7 +3,7 @@ import os
 import time  # Configure the S3 bucket and object key
 
 bucket_name = "hg.objalert-binaries.eu-central-1"
-file_path = "./file.txt"  # Replace with your local file path
+file_path = "./file"  # Replace with your local file path
 object_key = os.path.basename(file_path)  # Upload the file to S3
 s3 = boto3.client("s3")
 s3.upload_file(file_path, bucket_name, object_key)

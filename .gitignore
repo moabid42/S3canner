@@ -3,3 +3,4 @@ err*
 *.zip
 *.tfstate*
 tfplane
+.env
