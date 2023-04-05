@@ -17,7 +17,11 @@ This project is about creating a serverless AWS pipeline where any object added 
       export AWS_ACCESS_KEY_ID="access-key"
       export AWS_SECRET_ACCESS_KEY="secret-key"
       ```
-  3. Makefile guide:
+  3. Add the enviroment variable `.env`, which should contain:
+    ```bash
+    SQS_URL = "your url here"
+    ```
+  4. Makefile guide:
       - You can deploy using :
       ```bash
         make
