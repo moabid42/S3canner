@@ -1,6 +1,11 @@
 .terraform*
 err*
-*.zip
+lambda*.zip
 *.tfstate*
 tfplane
 .env
+__pycache__
+github.com
+yara_python-4*
+yara.cpython*
+binary_yara_rules.bin

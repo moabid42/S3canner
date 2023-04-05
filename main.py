@@ -1,15 +1,14 @@
 import os
 import hcl
-import sys
-import glob
 import boto3
 import shutil
 import zipfile
 import logging
 import argparse
-import tempfile
-import unittest
 import subprocess
+
+from lambda_functions.analyzer_function.main import COMPILED_RULES_FILENAME
+from core.rules.compile_rules import compile_rules
 
 # LOGGER 
 LOGGER = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 PROJ_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Core dir
-CORE_DIR = os.path.join(PROJ_DIR, './')
+CORE_DIR = os.path.join(PROJ_DIR, 'core')
 
 # Terraform dir
 TERRAFORM_DIR = os.path.join(PROJ_DIR, 'terraform')
@@ -27,8 +26,13 @@ TERRAFORM_DIR = os.path.join(PROJ_DIR, 'terraform')
 TERRAFORM_CONFIG = os.path.join(TERRAFORM_DIR, 'terraform.tfvars')
 
 # Analyzer Lambda function source and zip package
-ANALYZE_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'lambda_functions', 'analyzer_function', 'main.py')
-ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer.zip') 
+ANALYZE_LAMBDA_DIR = os.path.join(PROJ_DIR, 'lambda_functions', 'analyzer_function')
+ANALYZE_LAMBDA_SOURCE = os.path.join(ANALYZE_LAMBDA_DIR, 'main.py')
+ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer') 
+
+# Yara Analyzer dependencies
+YARA_DIR = os.path.join(CORE_DIR, 'rules')
+ANALYZE_LAMBDA_DEPENDENCIES =  os.path.join(YARA_DIR, 'yara-python.zip')
 
 # Batch Lambda function source and zip package
 BATCH_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'lambda_functions', 'batcher_function', 'main.py')
@@ -73,11 +77,16 @@ def build_dispatcher_():
         pkg.write(DISPATCH_LAMBDA_SOURCE, os.path.basename(DISPATCH_LAMBDA_SOURCE))
 
 def build_analyser_():
+    # Clone the YARA-rules repo and compile the YARA rules
+    compile_rules(os.path.join(ANALYZE_LAMBDA_DIR, COMPILED_RULES_FILENAME))
+
     # Build the YARA analyser Lambda deplyment package
     print('Creating analyzer deploy package...')
-    with zipfile.ZipFile(ANALYZE_LAMBDA_PACKAGE, 'w') as pkg:
-        pkg.write(ANALYZE_LAMBDA_SOURCE, os.path.basename(ANALYZE_LAMBDA_SOURCE))
-    return
+    with zipfile.ZipFile(ANALYZE_LAMBDA_DEPENDENCIES, 'r') as deps:
+        deps.extractall(ANALYZE_LAMBDA_DIR)
+
+    # Zip up the package
+    shutil.make_archive(ANALYZE_LAMBDA_PACKAGE, 'zip', ANALYZE_LAMBDA_DIR)
 
 def build() -> None:
     # Build the Lambda deployment packages
