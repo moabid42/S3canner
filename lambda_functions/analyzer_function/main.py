@@ -4,7 +4,10 @@ import yara
 import uuid
 import hashlib
 import logging
-import newobjalert.lambda_functions.analyzer_function.aws_lib as aws_lib
+if __package__:
+    import lambda_functions.analyzer_function.aws_lib as aws_lib
+else :
+    import aws_lib
 
 from botocore.exceptions import ClientError as BotoError
 
@@ -12,21 +15,14 @@ from botocore.exceptions import ClientError as BotoError
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-# Consts
 THIS_DIRECTORY          = os.path.dirname(os.path.realpath(__file__))
 COMPILED_RULES_FILENAME = 'binary_yara_rules.bin'
 COMPILED_RULES_FILEPATH = os.path.join(THIS_DIRECTORY, COMPILED_RULES_FILENAME)
 
-MB = 2 ** 20  # ~ relativly 1 million bytes
+MB = 2 ** 20  # ~ 1 million bytes
 
 def _read_in_chunks(file_object, chunk_size=2*MB):
-    """Read a file in fixed-size chunks (to minimize memory usage for large files).
-    Args:
-        file_object: An opened file-like object supporting read().
-        chunk_size: [int] Max size (in bytes) of each file chunk.
-    Yields:
-        [string] file chunks, each of size at most chunk_size.
-    """
+    #Read a file in fixed-size chunks (to minimize memory usage for large files).
     while True:
         chunk = file_object.read(chunk_size)
         if chunk:
@@ -36,13 +32,9 @@ def _read_in_chunks(file_object, chunk_size=2*MB):
 
 
 def compute_hashes(file_path):
-    """Compute SHA and MD5 hashes for the specified file object.
-    The MD5 is only included to be compatible with other security tools.
-    Args:
-        file_path: [string] File path to be analyzed.
-    Returns:
-        String tuple (sha_hash, md5_hash).
-    """
+    # Compute SHA and MD5 hashes for the specified file object.
+    # The MD5 is only included to be compatible with other security tools.
+
     sha = hashlib.sha256()
     md5 = hashlib.md5()
     with open(file_path, mode='rb') as file_object:
@@ -65,7 +57,7 @@ class YaraAnalyzer(object):
 
     @staticmethod
     def _yara_variables(original_target_path):
-        # Compute external variables needed for some YARA rules and map the string var name into a dict of string values.
+        # Compute external variables needed for some YARA rules and map them into a dict of string 
         file_name = os.path.basename(original_target_path)
         file_suffix = file_name.split('.')[-1] if '.' in file_name else ''  # e.g. "exe" or "rar".
         return {
@@ -73,15 +65,13 @@ class YaraAnalyzer(object):
             'filename': file_name,
             'filepath': original_target_path,
             'filetype': file_suffix.upper()  # Used in only one rule (checking for "GIF").
-            # can still add here some more informations; e.g: Network connection details.
         }
 
     def analyze(self, target_file, original_target_path=''):
-        # Run YARA analysis on a file and return a list of yara match objects
         return self._rules.match(target_file, externals=self._yara_variables(original_target_path))
 
 class BinaryInfo(object):
-    # Organizes the analysis of a single binary block in S3
+    # Organizes the analysis of a single binary blob in S3.
 
     def __init__(self, bucket_name, object_key, yara_analyzer):
         self.bucket_name = bucket_name
@@ -103,11 +93,11 @@ class BinaryInfo(object):
         return ['{}:{}'.format(match.namespace, match.rule) for match in self.yara_matches]
 
     def __str__(self):
-        # Use the S3 identifier as the string representation of the binary
+        """Use the S3 identifier as the string representation of the binary."""
         return self.s3_identifier
 
     def __enter__(self):
-        # Download the binary from S3 and run YARA analysis
+        """Download the binary from S3 and run YARA analysis."""
         self._download_from_s3()
         self.computed_sha, self.computed_md5 = compute_hashes(self.download_path)
 
@@ -118,7 +108,7 @@ class BinaryInfo(object):
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        # Remove the downloaded binary from local disk
+        """Remove the downloaded binary from local disk."""
         # In Lambda, "os.remove" does not actually remove the file as expected.
         # Thus, we first truncate the file to set its size to 0 before removing it.
         if os.path.isfile(self.download_path):
@@ -127,7 +117,7 @@ class BinaryInfo(object):
             os.remove(self.download_path)
 
     def _download_from_s3(self):
-        # Download binary from S3 and measure elapsed time
+        """Download binary from S3 and measure elapsed time."""
         LOGGER.debug('Downloading to %s', self.download_path)
 
         start_time = time.time()
@@ -139,8 +129,12 @@ class BinaryInfo(object):
         self.observed_path = s3_metadata.get('observed_path', '')
 
     def save_matches_and_alert(self, lambda_version, dynamo_table_name, sns_topic_arn):
-        # Save match results to Dynamo and publish an alert to SNS if appropriate.
-        # still have some probelms with dynamo DB
+        """Save match results to Dynamo and publish an alert to SNS if appropriate.
+        Args:
+            lambda_version: [int] The currently executing version of the Lambda function.
+            dynamo_table_name: [string] Save YARA match results to this Dynamo table.
+            sns_topic_arn: [string] Publish match alerts to this SNS topic ARN.
+        """
         table = aws_lib.DynamoMatchTable(dynamo_table_name)
         needs_alert = table.save_matches(self, lambda_version)
 
