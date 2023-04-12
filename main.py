@@ -27,12 +27,11 @@ TERRAFORM_CONFIG = os.path.join(TERRAFORM_DIR, 'terraform.tfvars')
 
 # Analyzer Lambda function source and zip package
 ANALYZE_LAMBDA_DIR = os.path.join(PROJ_DIR, 'lambda_functions', 'analyzer_function')
-ANALYZE_LAMBDA_SOURCE = os.path.join(ANALYZE_LAMBDA_DIR, 'main.py')
 ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer') 
 
 # Yara Analyzer dependencies
 YARA_DIR = os.path.join(CORE_DIR, 'rules')
-ANALYZE_LAMBDA_DEPENDENCIES =  os.path.join(YARA_DIR, 'yara-python.zip')
+ANALYZE_LAMBDA_DEPENDENCIES =  os.path.join(ANALYZE_LAMBDA_DIR, 'yara_python_3.6.3.zip')
 
 # Batch Lambda function source and zip package
 BATCH_LAMBDA_SOURCE = os.path.join(PROJ_DIR, 'lambda_functions', 'batcher_function', 'main.py')
@@ -44,6 +43,9 @@ DISPATCH_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_dispatcher.zip')
 
 # NAME_PREFIX
 NAME_PREFIX = 'hg-'
+
+# YARA Directory
+LAYER_DIR = os.path.join(CORE_DIR, 'rules', 'python')
 
 # Lambda alias terraform targets, to be updated separately.
 LAMBDA_ALIASES_TERRAFORM_TARGETS = [
@@ -80,10 +82,22 @@ def build_analyser_():
     # Clone the YARA-rules repo and compile the YARA rules
     compile_rules(os.path.join(ANALYZE_LAMBDA_DIR, COMPILED_RULES_FILENAME))
 
+    # Add the layer directory to the ANALYZE_LAMBDA_DEPENDENCIES folder
+    # with zipfile.ZipFile(ANALYZE_LAMBDA_DEPENDENCIES, 'w') as deps:
+    #     for root, dirs, files in os.walk(ANALYZE_LAMBDA_DIR):
+    #         for file in files:
+    #             deps.write(os.path.join(root, file))
+
+    #     for root, dirs, files in os.walk(LAYER_DIR):
+    #         for file in files:
+    #             deps.write(os.path.join(root, file))
+
     # Build the YARA analyser Lambda deplyment package
     print('Creating analyzer deploy package...')
     with zipfile.ZipFile(ANALYZE_LAMBDA_DEPENDENCIES, 'r') as deps:
         deps.extractall(ANALYZE_LAMBDA_DIR)
+
+    print('We did extract the nessecary depends and now gonna zip everything', ANALYZE_LAMBDA_DEPENDENCIES)
 
     # Zip up the package
     shutil.make_archive(ANALYZE_LAMBDA_PACKAGE, 'zip', ANALYZE_LAMBDA_DIR)

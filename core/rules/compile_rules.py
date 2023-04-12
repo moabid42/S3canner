@@ -27,13 +27,21 @@ def _find_yara_files():
 def compile_rules(target_path):
     
     #Remove existing github rules
-    if not os.path.join(RULES_DIR, 'github.com'):
+    if os.path.exists(os.path.join(RULES_DIR, 'github.com')):
         shutil.rmtree(os.path.join(RULES_DIR, 'github.com'))
+    
+    if os.path.exists('/tmp/rules.git'):
+        exists = True
+    else:
+        exists = False
 
     for url, folders in REMOTE_RULE_SOURCES.items():
         # Clone repo into a temp directory
         print('Cloning YARA rules from {}/{}...'.format(url, folders))
         cloned_repo_rule = os.path.join(tempfile.gettempdir(), os.path.basename(url))
+        if exists == True:
+            shutil.rmtree(cloned_repo_rule)
+            exists = False
         subprocess.check_call(['git', 'clone', '--quiet', url, cloned_repo_rule])
 
         # Copy each specified folder into the target rules directory
@@ -41,6 +49,16 @@ def compile_rules(target_path):
             source = os.path.join(cloned_repo_rule, folder)
             dest = os.path.join(RULES_DIR, url.split('//')[1], folder)
             shutil.copytree(source, dest)
+
+        print("The YARA RULE path is : ", RULES_DIR)
+        # Copy all the .yar files from the test_rules folder to the same folder as other .yar files
+        test_rules_path = os.path.join(RULES_DIR, 'test_rules')
+        for dirpath, dirnames, filenames in os.walk(test_rules_path):
+            for filename in filenames:
+                if filename.endswith('.yar'):
+                    source = os.path.join(dirpath, filename)
+                    dest = os.path.join(RULES_DIR, url.split('//')[1], filename)
+                    shutil.copy2(source, dest)
 
         shutil.rmtree(cloned_repo_rule)
 

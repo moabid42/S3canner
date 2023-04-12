@@ -9,3 +9,7 @@ github.com
 yara_python-4*
 yara.cpython*
 binary_yara_rules.bin
+yara.so
+yara_python-3.6.3.egg-info/
+libpython3.5*
+yara_python.zip

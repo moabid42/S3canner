@@ -48,9 +48,10 @@ def receive_message_sqs(queue_url: str, wait_time_seconds: int) -> Optional[dict
         WaitTimeSeconds = wait_time_seconds
     )
 
-"""Convert a batch of SQS messages into an analysis Lambda payload.
+"""
+Convert a batch of SQS messages into an analysis Lambda payload.
 
-Args:
+From sqs_message:
     sqs_messages: [dict] Response from SQS.receive_message. Expected format:
         {
             'Messages': [
@@ -64,13 +65,15 @@ Args:
         There may be multiple SQS messages, each of which may contain multiple S3 keys.
         Each message body is a JSON string, in the format of an S3 object added event.
 
-Returns:
+To :
     [dict] Non-empty payload for the analysis Lambda function in the following format:
     {
         'S3Objects': ['key1', 'key2', ...],
         'SQSReceipts': ['receipt1', 'receipt2', ...]
     }
-    [None] if the SQS message was empty or invalid."""
+    [None] if the SQS message was empty or invalid.
+"""
+
 def _build_payload(sqs_messages):
     if 'Messages' not in sqs_messages:
         LOGGER.info('No SQS messages found')
