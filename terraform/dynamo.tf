@@ -1,6 +1,6 @@
 // DynamoDB table for storing match results.
-resource "aws_dynamodb_table" "objalert_yara_matches" {
-  name           = "${var.name_prefix}_objalert_matches"
+resource "aws_dynamodb_table" "s3canner_yara_matches" {
+  name           = "${var.name_prefix}_s3canner_matches"
   hash_key       = "SHA256"
   range_key      = "LambdaVersion"
   read_capacity  = var.dynamo_read_capacity
@@ -18,6 +18,6 @@ resource "aws_dynamodb_table" "objalert_yara_matches" {
   }
 
   tags = {
-    Name = "ObjAlert"
+    Name = "S3canner"
   }
 }

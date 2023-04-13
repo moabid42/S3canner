@@ -9,16 +9,7 @@ SNS_PUBLISH_SUBJECT_MAX_SIZE = 99
 
 
 def download_from_s3(bucket_name, object_key, download_path):
-    """Download an object from S3 into local /tmp storage.
-
-    Args:
-        bucket_name: [string] S3 bucket name.
-        object_key: [string] S3 object key.
-        download_path: [string] Where to download the file locally.
-
-    Returns:
-        [dict] S3 metadata.
-    """
+    # Download an object from S3 into local /tmp storage and return the metadata.
     response = boto3.client('s3').get_object(Bucket=bucket_name, Key=object_key)
     with open(download_path, 'wb') as file:
         file.write(response['Body'].read())
@@ -27,15 +18,7 @@ def download_from_s3(bucket_name, object_key, download_path):
 
 
 def _elide_string_middle(text, max_length):
-    """Replace the middle of the text with ellipses to shorten text to the desired length.
-
-    Args:
-        text: [string] Text to shorten.
-        max_length: [int] Maximum allowable length of the string.
-
-    Returns:
-        [string] The elided text, e.g. "Some really long tex ... the end."
-    """
+    # Replace the middle of the text with ellipses to shorten text to the desired length.
     if len(text) <= max_length:
         return text
 
@@ -44,12 +27,7 @@ def _elide_string_middle(text, max_length):
 
 
 def publish_alert_to_sns(binary, topic_arn):
-    """Publish a JSON SNS alert: a binary has matched one or more YARA rules.
-
-    Args:
-        binary: [BinaryInfo] Instance containing information about the binary.
-        topic_arn: [string] Publish to this SNS topic ARN.
-    """
+    # Publish a JSON SNS alert: a binary has matched one or more YARA rules.
     subject = 'BinaryAlert: {} matches a YARA rule'.format(
         binary.observed_path or binary.reported_md5 or binary.computed_md5)
     boto3.client('sns').publish(
@@ -57,6 +35,7 @@ def publish_alert_to_sns(binary, topic_arn):
         Subject=_elide_string_middle(subject, SNS_PUBLISH_SUBJECT_MAX_SIZE),
         Message=(json.dumps(binary.summary(), indent=4, sort_keys=True))
     )
+    LOGGER.info(json.dumps(binary.summary(), indent=4, sort_keys=True))
 
 
 def delete_sqs_messages(queue_url, receipts):
@@ -214,23 +193,12 @@ class DynamoMatchTable(object):
         )
 
     def save_matches(self, binary, lambda_version):
-        """Save YARA match results to the Dynamo table.
+        # Save YARA match results to the Dynamo table.
 
-        Args:
-            binary: [BinaryInfo] Instance containing information about the binary.
-            lambda_version: [int] Version of the currently executing Lambda function.
-
-        Returns:
-            [boolean] Whether an alert should be fired. Returns True if:
-                The current Lambda version is >= the most recent analysis version AND
-                (a) Any YARA rule is matched now that was not matched in the previous version, OR
-                (b) A new S3 object appears which is identical to an already matched binary.
-        """
-        needs_alert = False
-
+        needs_alert = True
         # Grab the most recent match results for the given SHA.
         item_tuple = self._most_recent_item(binary.computed_sha)
-
+        LOGGER.info(item_tuple)
         if item_tuple is not None:
             # An entry already exists for this SHA.
             item_lambda_version, item_matched_rules, item_s3_objects = item_tuple
@@ -247,6 +215,7 @@ class DynamoMatchTable(object):
             if lambda_version < item_lambda_version:
                 LOGGER.warning('Current Lambda version %d is < version %d from previous analysis',
                                lambda_version, item_lambda_version)
+                needs_alert = False
             elif (bool(set(binary.matched_rule_ids) - item_matched_rules) or
                   binary.s3_identifier not in item_s3_objects):
                 # Either a new YARA rule matched or a new S3 object was found.

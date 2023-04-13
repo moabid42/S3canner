@@ -9,7 +9,7 @@ variable "name_prefix" {
 variable "sqs_retention_minutes" {
 }
 variable "tagged_name" {
-  default = "Objalert"
+  default = "S3canner"
 }
 
 

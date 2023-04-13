@@ -49,14 +49,14 @@ LAYER_DIR = os.path.join(CORE_DIR, 'rules', 'python')
 
 # Lambda alias terraform targets, to be updated separately.
 LAMBDA_ALIASES_TERRAFORM_TARGETS = [
-    '-target=module.{}objalert_{}.aws_lambda_alias.production_alias'.format(NAME_PREFIX, name)
+    '-target=module.{}s3canner_{}.aws_lambda_alias.production_alias'.format(NAME_PREFIX, name)
     for name in ['analyzer', 'batcher', 'dispatcher']
 ]
 
 ''' Core function '''
 
 def deploy() -> None:
-    # Deploy ObjAlert. Equivalent to test + build + apply
+    # Deploy S3canner. Equivalent to test + build + apply
     test()
     build()
     apply()
@@ -91,7 +91,6 @@ def build_analyser_():
     #     for root, dirs, files in os.walk(LAYER_DIR):
     #         for file in files:
     #             deps.write(os.path.join(root, file))
-
     # Build the YARA analyser Lambda deplyment package
     print('Creating analyzer deploy package...')
     with zipfile.ZipFile(ANALYZE_LAMBDA_DEPENDENCIES, 'r') as deps:
@@ -152,7 +151,7 @@ def main() -> None:
     parser.add_argument(
         'command',
         choices =   ['deploy', 'test', 'build', 'apply'],
-        help    =   'deploy        Deploy ObjAlert. Equivalent to test + build + apply.\n'
+        help    =   'deploy        Deploy S3canner. Equivalent to test + build + apply.\n'
                     'test          Run unit tests.\n'
                     'build         Build Lambda packages (saves *.zip files in terraform/).\n'
                     'apply         Terraform validate and apply any configuration/package changes.\n')

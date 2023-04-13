@@ -2,10 +2,10 @@
 
 // The batch function had an error enqueueing an S3 key.
 resource "aws_cloudwatch_metric_alarm" "batch_enqueue_errors" {
-  alarm_name = "${module.objalert_batcher.function_name}_enqueue_errors"
+  alarm_name = "${module.s3canner_batcher.function_name}_enqueue_errors"
 
   alarm_description = <<EOF
-${module.objalert_batcher.function_name} failed to enqueue one or more S3 keys into the SQS queue
+${module.s3canner_batcher.function_name} failed to enqueue one or more S3 keys into the SQS queue
 ${aws_sqs_queue.s3_object_queue.arn}.
   - Check the batcher CloudWatch logs.
   - SQS may be down.
@@ -13,7 +13,7 @@ ${aws_sqs_queue.s3_object_queue.arn}.
 any files which might have been missed.
 EOF
 
-  namespace   = "ObjAlert"
+  namespace   = "S3canner"
   metric_name = "BatchEnqueueFailures"
   statistic   = "Sum"
 
@@ -24,17 +24,17 @@ EOF
   alarm_actions       = ["${aws_sns_topic.metric_alarms.arn}"]
 }
 
-// The production ObjAlert analyzer is not analyzing binaries.
+// The production S3canner analyzer is not analyzing binaries.
 resource "aws_cloudwatch_metric_alarm" "analyzed_binaries" {
-  alarm_name = "${module.objalert_analyzer.function_name}_no_analyzed_binaries"
+  alarm_name = "${module.s3canner_analyzer.function_name}_no_analyzed_binaries"
 
   alarm_description = <<EOF
-${module.objalert_analyzer.function_name} is not analyzing any binaries!
-  - If any ObjAlert Lambda function was recently deployed, roll it back via the AWS console.
+${module.s3canner_analyzer.function_name} is not analyzing any binaries!
+  - If any S3canner Lambda function was recently deployed, roll it back via the AWS console.
   - Binaries may not be arriving in the S3 bucket.
 EOF
 
-  namespace   = "ObjAlert"
+  namespace   = "S3canner"
   metric_name = "AnalyzedBinaries"
   statistic   = "Sum"
 
@@ -79,14 +79,14 @@ EOF
 
 // There are very few YARA rules.
 resource "aws_cloudwatch_metric_alarm" "yara_rules" {
-  alarm_name = "${module.objalert_analyzer.function_name}_too_few_yara_rules"
+  alarm_name = "${module.s3canner_analyzer.function_name}_too_few_yara_rules"
 
   alarm_description = <<EOF
-The number of YARA rules in ObjAlert is surprisingly low.
+The number of YARA rules in S3canner is surprisingly low.
 Check if a recent deploy accidentally removed most YARA rules.
 EOF
 
-  namespace   = "ObjAlert"
+  namespace   = "S3canner"
   metric_name = "YaraRules"
   statistic   = "Maximum"
 
@@ -100,7 +100,7 @@ EOF
 
 // Dynamo requests are being throttled.
 resource "aws_cloudwatch_metric_alarm" "dynamo_throttles" {
-  alarm_name = "${aws_dynamodb_table.objalert_yara_matches.name}_throttles"
+  alarm_name = "${aws_dynamodb_table.s3canner_yara_matches.name}_throttles"
 
   alarm_description = <<EOF
 Read or write requests to the DynamoDB table are being throttled.
@@ -109,7 +109,7 @@ Read or write requests to the DynamoDB table are being throttled.
   - If there was a recent deploy with new YARA rules, there may be more matches than Dynamo has been
     provisioned to handle. In this case, rollback the analyzer in the AWS Console and fix the rules.
   - If this is normal/expected behavior, increase the read capacity for the Dynamo table in the
-    ObjAlert terraform.tfvars config file.
+    S3canner terraform.tfvars config file.
 EOF
 
   namespace   = "AWS/DynamoDB"
@@ -117,7 +117,7 @@ EOF
   statistic   = "Sum"
 
   dimensions = {
-    TableName = "${aws_dynamodb_table.objalert_yara_matches.name}"
+    TableName = "${aws_dynamodb_table.s3canner_yara_matches.name}"
   }
 
   comparison_operator = "GreaterThanThreshold"

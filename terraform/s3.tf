@@ -1,6 +1,6 @@
 // S3 Bucket the store the backend state
 # resource "aws_s3_bucket" "backend_state_bucket" {
-#   bucket = "hg-terraform-state-objalert"
+#   bucket = "hg-terraform-state-s3canner"
 #   acl    = "private"
 #   region = "eu-central-1"
 
@@ -18,10 +18,10 @@
 # }
 
 // S3 bucket for storing access logs.
-resource "aws_s3_bucket" "objalert_log_bucket" {
+resource "aws_s3_bucket" "s3canner_log_bucket" {
   count = var.s3_log_bucket == "" ? 1 : 0 // Create only if no pre-existing log bucket.
 
-  bucket = format("%s.objalert-binaries.%s.access-logs", var.name_prefix, var.aws_region)
+  bucket = format("%s.s3canner-binaries.%s.access-logs", var.name_prefix, var.aws_region)
   acl    = "log-delivery-write"
 
   // Everything in the log bucket rotates to infrequent access and expires.
@@ -48,12 +48,12 @@ resource "aws_s3_bucket" "objalert_log_bucket" {
   // Enable logging on the logging bucket itself.
   logging {
     // The target bucket is the same as the name of this bucket.
-    target_bucket = format("%s.objalert-binaries.%s.access-logs", var.name_prefix, var.aws_region)
+    target_bucket = format("%s.s3canner-binaries.%s.access-logs", var.name_prefix, var.aws_region)
     target_prefix = "self/"
   }
 
   tags = {
-    Name = "ObjAlert"
+    Name = "S3canner"
   }
 
   // Enabling versioning protects against accidental deletes.
@@ -65,15 +65,15 @@ resource "aws_s3_bucket" "objalert_log_bucket" {
 }
 
 // Source S3 bucket: binaries uploaded here will be automatically analyzed.
-resource "aws_s3_bucket" "objalert_binaries" {
-  bucket = "${var.name_prefix}.objalert-binaries.${var.aws_region}"
+resource "aws_s3_bucket" "s3canner_binaries" {
+  bucket = "${var.name_prefix}.s3canner-binaries.${var.aws_region}"
   acl    = "private"
 
   logging {
     // Send S3 access logs to either the user-defined logging bucket or the one we created.
     // Note: We can't reference log bucket ID here becuase the bucket may not exist.
     target_bucket = (var.s3_log_bucket == "" ?
-      format("%s.objalert-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
+      format("%s.s3canner-binaries.%s.access-logs", replace(var.name_prefix, "_", "."), var.aws_region)
     : var.s3_log_bucket)
 
     target_prefix = var.s3_log_prefix
@@ -93,7 +93,7 @@ resource "aws_s3_bucket" "objalert_binaries" {
     }
   }
   tags = {
-    Name = "ObjAlert"
+    Name = "S3canner"
   }
   versioning {
     enabled = true
@@ -102,8 +102,8 @@ resource "aws_s3_bucket" "objalert_binaries" {
 }
 
 // Blocking public access to S3 buckets
-resource "aws_s3_bucket_public_access_block" "block_objalert_binaries_bucket" {
-  bucket = aws_s3_bucket.objalert_binaries.id
+resource "aws_s3_bucket_public_access_block" "block_s3canner_binaries_bucket" {
+  bucket = aws_s3_bucket.s3canner_binaries.id
 
   restrict_public_buckets = true
   block_public_acls       = true
@@ -111,8 +111,8 @@ resource "aws_s3_bucket_public_access_block" "block_objalert_binaries_bucket" {
   ignore_public_acls      = true
 }
 
-resource "aws_s3_bucket_public_access_block" "block_objalert_log_bucket" {
-  bucket = aws_s3_bucket.objalert_log_bucket[0].id
+resource "aws_s3_bucket_public_access_block" "block_s3canner_log_bucket" {
+  bucket = aws_s3_bucket.s3canner_log_bucket[0].id
 
   restrict_public_buckets = true
   block_public_acls       = true
@@ -122,7 +122,7 @@ resource "aws_s3_bucket_public_access_block" "block_objalert_log_bucket" {
 
 # Notification event to SQS
 resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = aws_s3_bucket.objalert_binaries.id
+  bucket = aws_s3_bucket.s3canner_binaries.id
 
   queue {
     queue_arn = aws_sqs_queue.s3_object_queue.arn
@@ -135,10 +135,10 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 # Notfiy the lambda function
 resource "aws_s3_bucket_notification" "lambda_bucket_notification" {
-  bucket = aws_s3_bucket.objalert_binaries.id
+  bucket = aws_s3_bucket.s3canner_binaries.id
 
   lambda_function {
-    lambda_function_arn = module.objalert_batcher.function_arn
+    lambda_function_arn = module.s3canner_batcher.function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = ""
     filter_suffix       = ""

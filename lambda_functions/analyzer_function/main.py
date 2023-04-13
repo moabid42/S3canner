@@ -93,11 +93,11 @@ class BinaryInfo(object):
         return ['{}:{}'.format(match.namespace, match.rule) for match in self.yara_matches]
 
     def __str__(self):
-        """Use the S3 identifier as the string representation of the binary."""
+        # Use the S3 identifier as the string representation of the binary
         return self.s3_identifier
 
     def __enter__(self):
-        """Download the binary from S3 and run YARA analysis."""
+        # Download the binary from S3 and run YARA analysis
         self._download_from_s3()
         self.computed_sha, self.computed_md5 = compute_hashes(self.download_path)
 
@@ -108,7 +108,7 @@ class BinaryInfo(object):
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        """Remove the downloaded binary from local disk."""
+        # Remove the downloaded binary from local disk
         # In Lambda, "os.remove" does not actually remove the file as expected.
         # Thus, we first truncate the file to set its size to 0 before removing it.
         if os.path.isfile(self.download_path):
@@ -117,7 +117,7 @@ class BinaryInfo(object):
             os.remove(self.download_path)
 
     def _download_from_s3(self):
-        """Download binary from S3 and measure elapsed time."""
+        # Download binary from S3 and measure elapsed time
         LOGGER.debug('Downloading to %s', self.download_path)
 
         start_time = time.time()
@@ -129,15 +129,12 @@ class BinaryInfo(object):
         self.observed_path = s3_metadata.get('observed_path', '')
 
     def save_matches_and_alert(self, lambda_version, dynamo_table_name, sns_topic_arn):
-        """Save match results to Dynamo and publish an alert to SNS if appropriate.
-        Args:
-            lambda_version: [int] The currently executing version of the Lambda function.
-            dynamo_table_name: [string] Save YARA match results to this Dynamo table.
-            sns_topic_arn: [string] Publish match alerts to this SNS topic ARN.
-        """
+        # Save match results to Dynamo and publish an alert to SNS if appropriate.
         table = aws_lib.DynamoMatchTable(dynamo_table_name)
         needs_alert = table.save_matches(self, lambda_version)
 
+        LOGGER.info(needs_alert)
+        LOGGER.info('We should publish the sns alert now')
         # Send alert if appropriate.
         if needs_alert:
             LOGGER.info('Publishing an SNS alert')

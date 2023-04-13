@@ -2,10 +2,10 @@
 
 terraform {
   backend "s3" {
-    bucket         = "objalert-tfstate"
+    bucket         = "s3canner-tfstate"
     key            = "terraform.tfstate"
     region         = "eu-central-1"
-    dynamodb_table = "objalert-app-state"
+    dynamodb_table = "s3canner-app-state"
     encrypt        = true
   }
 }

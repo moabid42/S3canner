@@ -110,7 +110,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
   alarm_description = <<EOF
 ${var.function_name} is being throttled,
 i.e. the number of concurrent Lambda invocations is exceeding your account limit in this region.
-Lower the lamda_dispatch_limit in the ObjAlert config or request an AWS limit increase.
+Lower the lamda_dispatch_limit in the S3canner config or request an AWS limit increase.
 EOF
 
   namespace   = "AWS/Lambda"

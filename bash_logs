@@ -667,7 +667,7 @@ cd Praktikum/
 #1679041182
 code .
 #1679041425
-git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws-objalert.git 
+git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws-s3canner.git 
 #1679043388
 code .
 #1679043434
@@ -677,9 +677,9 @@ cd Downloads/
 #1679043447
 pwd
 #1679043733
-cp chartflow.png ../Praktikum/aws-objalert/chartflow.png
+cp chartflow.png ../Praktikum/aws-s3canner/chartflow.png
 #1679043764
-cd ../Praktikum/aws-objalert/
+cd ../Praktikum/aws-s3canner/
 #1679043769
 git add .
 #1679043775
@@ -960,7 +960,7 @@ cd binaryalert/
 #1679403703
 cd ..
 #1679403708
-cd aws-objalert/
+cd aws-s3canner/
 #1679404452
 git add .
 #1679404486
@@ -980,7 +980,7 @@ git add .
 #1679404917
 git reset --hard 31d0a1efd92b9fc64f34ea9e0a5338a636240bb2
 #1679404955
-cd Praktikum/aws-objalert/
+cd Praktikum/aws-s3canner/
 #1679404960
 git reset --hard 31d0a1efd92b9fc64f34ea9e0a5338a636240bb2
 #1679404963
@@ -1010,9 +1010,9 @@ git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch terra
 #1679405524
 cd ..
 #1679405539
-cp -r aws-objalert/ aws-scanner
+cp -r aws-s3canner/ aws-scanner
 #1679405556
-cd aws-objalert/
+cd aws-s3canner/
 #1679405559
 git log
 #1679405574
@@ -1046,7 +1046,7 @@ code .
 #1679471701
 git add .
 #1679471709
-cd aws-objalert/
+cd aws-s3canner/
 #1679471719
 git checkout main
 #1679471728
@@ -1158,13 +1158,13 @@ git status
 #1679482037
 git push
 #1679482474
-git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/objalert.git
+git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/s3canner.git
 #1679482534
 cd ..
 #1679482537
 cd obj
 #1679482542
-cd objalert/
+cd s3canner/
 #1679482783
 git add .
 #1679482786
@@ -1180,7 +1180,7 @@ git push
 #1679488202
 cd Praktikum/
 #1679488209
-cd objalert/
+cd s3canner/
 #1679488213
 git add .
 #1679488216
@@ -1206,7 +1206,7 @@ cd Praktikum/
 #1679500806
 cd obj
 #1679500810
-cd objalert/
+cd s3canner/
 #1679500817
 cd core/terraform/
 #1679500844
@@ -1246,7 +1246,7 @@ cd
 #1679562084
 cd Praktikum/
 #1679562089
-cd objalert/
+cd s3canner/
 #1679562193
 cd terraform/
 #1679562205
@@ -1308,13 +1308,13 @@ cd terrafor.4
 #1679567328
 cd ..
 #1679567349
-cp terrafor.4 ../../../../Praktikum/objalert/
+cp terrafor.4 ../../../../Praktikum/s3canner/
 #1679567357
-cp /terrafor.4 ../../../../Praktikum/objalert/
+cp /terrafor.4 ../../../../Praktikum/s3canner/
 #1679567567
-cp ./terrafor.4/ ../../../../Praktikum/objalert/
+cp ./terrafor.4/ ../../../../Praktikum/s3canner/
 #1679567585
-cp -r ./terrafor.4/ ../../../../Praktikum/objalert/
+cp -r ./terrafor.4/ ../../../../Praktikum/s3canner/
 #1679567608
 cd terrafor.4
 #1679567651
@@ -1322,11 +1322,11 @@ cd ..
 #1679567656
 cd
 #1679567661
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1679567666
 mkdir terraform
 #1679567669
-cp * ../../../../../Praktikum/objalert/terraform/
+cp * ../../../../../Praktikum/s3canner/terraform/
 #1679567676
 cd terraform/
 #1679567680
@@ -1352,7 +1352,7 @@ cd ..
 #1679568807
 cd terrafor.4
 #1679568832
-cp -r * ../../../../../Praktikum/objalert/terraform/
+cp -r * ../../../../../Praktikum/s3canner/terraform/
 #1679568849
 terraform init
 #1679568886
@@ -1384,7 +1384,7 @@ cd terraform/
 #1679572221
 terraform plan
 #1679574958
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1679574963
 terrafrom apply 
 #1679574968
@@ -1400,17 +1400,17 @@ cd Praktikum/
 #1679575435
 code .
 #1679646564
-cd objalert/
+cd s3canner/
 #1679646577
 cd terraform/
 #1679646588
 terraform plan
 #1679646614
-cd Praktikum/objalert/terraform/
+cd Praktikum/s3canner/terraform/
 #1679646620
 terraform plan
 #1679647724
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1679647731
 cd terraform/
 #1679647736
@@ -1426,7 +1426,7 @@ code .
 #1679661964
 cd Praktikum/
 #1679661968
-cd objalert/
+cd s3canner/
 #1679661978
 terraform plan
 #1679662042
@@ -1524,7 +1524,7 @@ cd Praktikum/
 #1679906589
 code .
 #1679909293
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1679909299
 cd terraform/
 #1679909305
@@ -1560,7 +1560,7 @@ cd Praktikum/
 #1679986902
 code .
 #1680003667
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680003690
 terraform plan 
 #1680004029
@@ -1574,11 +1574,11 @@ make require
 #1680004980
 make 
 #1680006188
-cat /home/guru/Praktikum/objalert/core/lambda_functions/batcher/main.py
+cat /home/guru/Praktikum/s3canner/core/lambda_functions/batcher/main.py
 #1680077951
 cd Praktikum/
 #1680077956
-cd objalert/
+cd s3canner/
 #1680077961
 code .
 #1680077998
@@ -1622,7 +1622,7 @@ make
 #1680079764
 cd Praktikum/
 #1680079768
-cd objalert/
+cd s3canner/
 #1680079772
 vim Makefile 
 #1680079884
@@ -1652,7 +1652,7 @@ cd Praktikum/
 #1680160472
 code .
 #1680161430
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680161434
 cd tests/
 #1680161440
@@ -1694,7 +1694,7 @@ make
 #1680162231
 ./philo 10 410 200 200
 #1680165583
-cd objalert/
+cd s3canner/
 #1680165587
 cd tests/
 #1680165595
@@ -1740,7 +1740,7 @@ python3 batcher_function_test.py
 #1680174356
 cd ..
 #1680174366
-cd Praktikum/objalert/tests
+cd Praktikum/s3canner/tests
 #1680174357
 make 
 #1680175159
@@ -1852,15 +1852,15 @@ cd ..
 #1680254418
 rm -rf smth/
 #1680254421
-cd aws-objalert/
+cd aws-s3canner/
 #1680254426
 cd ..
 #1680254432
-rm -rf aws-objalert/
+rm -rf aws-s3canner/
 #1680254457
-git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/objalert.git 
+git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/s3canner.git 
 #1680254461
-git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/objalert.git test
+git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/s3canner.git test
 #1680254468
 cd test/
 #1680254475
@@ -1870,7 +1870,7 @@ git log
 #1680254503
 cd Praktikum/
 #1680254508
-cd objalert/
+cd s3canner/
 #1680254510
 cleare
 #1680254515
@@ -2040,7 +2040,7 @@ terraform init
 #1680277190
 terraform apply -lock=false
 #1680277197
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680277203
 terraform apply -lock=false
 #1680277207
@@ -2080,7 +2080,7 @@ export AWS_SECRET_ACCESS_KEY="CZSqNeJY58KKAHMDiOdGvicgFOVkM4yQa+julXtZ"
 #1680509424
 export AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEPj//////////wEaDGV1LWNlbnRyYWwtMSJIMEYCIQDAVDQncdHjEXdGEgok3sN8wFcyXZsyye1gwSv2AciauAIhAOd/oJ+8B1GZJsBJIXboaxVUy+hxqUriE5mL2W1E5pQzKoUDCNH//////////wEQAhoMMzc1MTQwMDA1MDk1Igzg0HxsZK47TS6Hqwkq2QIG9l71VC7VuCYwKH9rh8RSuWKDTszB32kIyrxIhMKED8/iSNhwvLxDN4nOlwljnKPYL1b0xTJZ7ah/qZr+wJ+dYYVE6dIQAfOBLSJ2dxiYMxbB9VWcIP9SZ/CNLh0yM8f/L8krtFg1SMrL40uq+AgJNsqgFcpItSAiyxNuIxQ+ZqIRuLy3ChOr5zCklvE5TsVmcwTDCKIHEKl8dKE6H8K10t9gvvkJO23SlP4Ge5/j6Q65zFqUDtVmqas75DDlmRpvdTjReqJDrpD0tuNKp2aJmwbLj30pPTTGAIGbJgssoB+5HOVeRhjWXpyq5WYSM4MPD4vAPBVXH9LQv/u7ug3pubWnN8RQZdDIjrHU5vvXO6YrtZ2T42OHR1KCOuot2/W28eDwdx1qMbrbuWyJ1sj3/0Lj91PJzn1MEX4pYNQ2E8fCpxrFHpD7B6FuYNMbV6TZ1CVFvhpJtE8w7JOqoQY6pgGXwgCBHGFJuKiz11FOxRAcdej3o2LN/WYff8U+zHyPTAWjbikQqIuMESgdeKV+V9QdHcMiJlLopJGzRJ0bweF8b0BENz5CEk9uWtgmDEUc3rfP+tIZvvIJOY4x0GL3r1Q/k1M8TbUVCMhhijKknhywvhQUPZ2qa2HdvxnZTVx/XeN7RKR+CjadRkIOia61XYq1hF/+OM42NTjM2CYGfupnaV/IzG/3"
 #1680509428
-cd objalert/
+cd s3canner/
 #1680509451
 make
 #1680509616
@@ -2140,7 +2140,7 @@ cd ..
 #1680511104
 cd obj
 #1680511108
-cd objalert/
+cd s3canner/
 #1680511276
 git add .
 #1680511291
@@ -2276,11 +2276,11 @@ terraform plan -out=tfplane
 #1680514078
 terraform apply tfplane
 #1680514529
-cd objalert/
+cd s3canner/
 #1680514505
 terraform destroy
 #1680515977
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680515984
 cd terraform/
 #1680515988
@@ -2288,7 +2288,7 @@ terraform init
 #1680516001
 terraform destroy -auto-approve\
 #1680516665
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680516667
 code .
 #1680516760
@@ -2344,7 +2344,7 @@ make
 #1680518953
 make destroy
 #1680519026
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680519029
 git add .
 #1680519031
@@ -2510,7 +2510,7 @@ rm a.out smth.c smth.sh smth.txt
 #1680601071
 cd Praktikum/
 #1680601075
-cd objalert/
+cd s3canner/
 #1680601641
 make
 #1680601722
@@ -2528,7 +2528,7 @@ cd ..
 #1680602059
 cd Praktikum/
 #1680602063
-cd objalert/
+cd s3canner/
 #1680602067
 cd tests
 #1680602076
@@ -2766,11 +2766,11 @@ git commit -m "Implemented the dispatcher, finished the connection between all t
 #1680678992
 cd Praktikum/
 #1680678997
-cd objalert/
+cd s3canner/
 #1680679002
 code .
 #1680685012
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680685013
 cd test
 #1680685015
@@ -2778,7 +2778,7 @@ cd tests
 #1680685016
 c;ear
 #1680685033
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680685043
 cd core/rules/
 #1680685066
@@ -2828,11 +2828,11 @@ cd ..
 #1680686489
 cd core/rules/
 #1680686510
-cat /home/guru/Praktikum/objalert/core/rules/yara_python.zip
+cat /home/guru/Praktikum/s3canner/core/rules/yara_python.zip
 #1680686530
-cat /home/guru/Praktikum/objalert/core/rules/yara-python.zip
+cat /home/guru/Praktikum/s3canner/core/rules/yara-python.zip
 #1680686603
-cat /home/guru/Praktikum/objalert/core/rules/yara_python.zip
+cat /home/guru/Praktikum/s3canner/core/rules/yara_python.zip
 #1680687205
 cd ../..
 #1680687210
@@ -2946,11 +2946,11 @@ git status > error_git
 #1680694844
 cd ..
 #1680694850
-git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/objalert.git newobjalert
+git clone ssh://git@gitlab.haufedev.systems:2222/infosec/aws/s3canner.git news3canner
 #1680694857
 git status
 #1680694864
-cd newobjalert/
+cd news3canner/
 #1680694865
 git status
 #1680695081
@@ -2986,7 +2986,7 @@ cd rules/
 #1680695238
 mkdir core
 #1680695247
-cp * ~/Praktikum/newobjalert/core
+cp * ~/Praktikum/news3canner/core
 #1680695404
 make destory
 #1680695432
@@ -3000,13 +3000,13 @@ terraform destroy
 #1680695586
 cd ../..
 #1680695589
-cd objalert/
+cd s3canner/
 #1680695593
 make destroy
 #1680695686
 cd ..
 #1680695688
-cd newobjalert/
+cd news3canner/
 #1680695691
 make
 #1680695822
@@ -3042,11 +3042,11 @@ code .
 #1680698494
 cd Praktikum/obj
 #1680698500
-cd Praktikum/objalert/
+cd Praktikum/s3canner/
 #1680698504
-cd ../newobjalert/
+cd ../news3canner/
 #1680698521
-cd Praktikum/newobjalert/tests/
+cd Praktikum/news3canner/tests/
 #1680699802
 make
 #1680700059
@@ -3144,7 +3144,7 @@ cd lambda_functions/analyzer_function/
 #1680704809
 make
 #1680704915
-cd Praktikum/newobjalert/
+cd Praktikum/news3canner/
 #1680704916
 s
 #1680704941
@@ -3216,7 +3216,7 @@ ssh -i 'Mouad Abid.pem' ubuntu@3.70.228.75
 #1680770830
 cd ..
 #1680770837
-cd newobjalert/
+cd news3canner/
 #1680774397
 mv ~/Downloads/photo1680773998.jpeg ./img/
 #1680774447
@@ -3242,7 +3242,7 @@ unzip jpg2png.zip smth
 #1680774794
 unzip jpg2png.zip
 #1680774813
-mv newchart.png ../Praktikum/newobjalert/img/
+mv newchart.png ../Praktikum/news3canner/img/
 #1680774920
 git add README.md 
 #1680774924
@@ -3280,7 +3280,7 @@ scp -i 'Mouad Abid.pem' yara_python.zip ubuntu@3.70.228.75:/home/ubuntu/
 #1680776825
 scp -i 'Mouad Abid.pem' ubuntu@3.70.228.75:/home/ubuntu/yara_python.zip .
 #1680776860
-mv yara_python.zip ../Praktikum/newobjalert/lambda_functions/analyzer_function/
+mv yara_python.zip ../Praktikum/news3canner/lambda_functions/analyzer_function/
 #1680776871
 cd lambda_functions/analyzer_function/
 #1680776880
@@ -3288,7 +3288,7 @@ cd -
 #1680776947
 make
 #1680777361
-cd ../Praktikum/newobjalert/
+cd ../Praktikum/news3canner/
 #1680777364
 cd tests/
 #1680777368
@@ -3334,7 +3334,7 @@ mv yara_python.zip -
 #1680779419
 mv - yara_python.zip
 #1680779452
-mv yara_python.zip ../Praktikum/newobjalert/lambda_functions/analyzer_function/yara_python.zip
+mv yara_python.zip ../Praktikum/news3canner/lambda_functions/analyzer_function/yara_python.zip
 #1680779470
 cd -
 #1680779474

@@ -3,7 +3,7 @@ import boto3
 LOGS_CLIENT = boto3.client('logs')
 
 # Get the log group name
-log_group_name = '/aws/lambda/hg_objalert_batcher'
+log_group_name = '/aws/lambda/hg_s3canner_batcher'
 
 # Get the list of log streams in the log group
 log_streams = LOGS_CLIENT.describe_log_streams(logGroupName=log_group_name)['logStreams']

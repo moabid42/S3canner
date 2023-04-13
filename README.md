@@ -1,4 +1,4 @@
-# aws-objalert
+# aws-s3canner
 
 
 
@@ -47,7 +47,7 @@ This project is about creating a serverless AWS pipeline where any object added 
 ![smth](./img/newchart.png)
 
 ## Description
-- We start by setting up our ObjAlert system to analyze various files that are collected and delivered to their S3 bucket. The files could be of different types such as executable binaries, email attachments, documents, and more.
+- We start by setting up our S3canner system to analyze various files that are collected and delivered to their S3 bucket. The files could be of different types such as executable binaries, email attachments, documents, and more.
 
 - As soon as any file is uploaded to the S3 bucket, it is automatically queued for analysis. A dispatching Lambda function runs every minute to group the files into batches and invoke multiple analyzers in parallel. Each analyzer scans its designated files using a pre-compiled list of YARA rules.
 
@@ -55,7 +55,7 @@ This project is about creating a serverless AWS pipeline where any object added 
 
 - For retroactive analysis, a batching Lambda function enqueues the entire S3 bucket for re-analysis.
 
-- In addition, a preconfigurable CloudWatch alarms are set up be to triggered if any component of the ObjAlert system behaves abnormally. These alarms will notify a different SNS topic than the one used for YARA match alerts, allowing for efficient management of any issues that arise.
+- In addition, a preconfigurable CloudWatch alarms are set up be to triggered if any component of the S3canner system behaves abnormally. These alarms will notify a different SNS topic than the one used for YARA match alerts, allowing for efficient management of any issues that arise.
 
 ## Recourses
 ### Lambda Base Module

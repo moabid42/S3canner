@@ -8,9 +8,9 @@
 # }
 
 // Create the batch Lambda function.
-module "objalert_batcher" {
+module "s3canner_batcher" {
   source          = "./modules/lambda"
-  function_name   = "${var.name_prefix}_objalert_batcher"
+  function_name   = "${var.name_prefix}_s3canner_batcher"
   description     = "Enqueues all S3 objects into SQS for re-analysis"
   base_policy_arn = aws_iam_policy.base_policy.arn
   handler         = "main.batch_lambda_handler"
@@ -19,10 +19,10 @@ module "objalert_batcher" {
   filename        = "lambda_batcher.zip"
 
   environment_variables = {
-    BATCH_LAMBDA_NAME      = "${var.name_prefix}_objalert_batcher"
+    BATCH_LAMBDA_NAME      = "${var.name_prefix}_s3canner_batcher"
     BATCH_LAMBDA_QUALIFIER = "Production"
     OBJECTS_PER_MESSAGE    = "${var.lambda_batch_objects_per_message}"
-    S3_BUCKET_NAME         = "${aws_s3_bucket.objalert_binaries.id}"
+    S3_BUCKET_NAME         = "${aws_s3_bucket.s3canner_binaries.id}"
     SQS_QUEUE_URL          = "${aws_sqs_queue.s3_object_queue.id}"
   }
 
@@ -34,15 +34,15 @@ module "objalert_batcher" {
 resource "aws_lambda_permission" "allow_s3_trigger" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = module.objalert_batcher.function_arn
+  function_name = module.s3canner_batcher.function_arn
   principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.objalert_binaries.arn
+  source_arn    = aws_s3_bucket.s3canner_binaries.arn
 }
 
 // Create the dispatching Lambda function.
-module "objalert_dispatcher" {
+module "s3canner_dispatcher" {
   source          = "./modules/lambda"
-  function_name   = "${var.name_prefix}_objalert_dispatcher"
+  function_name   = "${var.name_prefix}_s3canner_dispatcher"
   description     = "Poll SQS events and fire them off to analyzers"
   base_policy_arn = aws_iam_policy.base_policy.arn
   handler         = "main.dispatch_lambda_handler"
@@ -51,8 +51,8 @@ module "objalert_dispatcher" {
   filename        = "lambda_dispatcher.zip"
 
   environment_variables = {
-    ANALYZE_LAMBDA_NAME      = "${module.objalert_analyzer.function_name}"
-    ANALYZE_LAMBDA_QUALIFIER = "${module.objalert_analyzer.alias_name}"
+    ANALYZE_LAMBDA_NAME      = "${module.s3canner_analyzer.function_name}"
+    ANALYZE_LAMBDA_QUALIFIER = "${module.s3canner_analyzer.alias_name}"
     MAX_DISPATCHES           = "${var.lambda_dispatch_limit}"
     SQS_QUEUE_URL            = "${aws_sqs_queue.s3_object_queue.id}"
   }
@@ -64,12 +64,12 @@ module "objalert_dispatcher" {
 
 // Allow dispatcher to be invoked via a CloudWatch rule.3
 resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
-  statement_id  = "AllowExecutionFromCloudWatch_${module.objalert_dispatcher.function_name}"
+  statement_id  = "AllowExecutionFromCloudWatch_${module.s3canner_dispatcher.function_name}"
   action        = "lambda:InvokeFunction"
-  function_name = module.objalert_dispatcher.function_name
+  function_name = module.s3canner_dispatcher.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
-  qualifier     = module.objalert_dispatcher.alias_name
+  qualifier     = module.s3canner_dispatcher.alias_name
 }
 
 # // Allow dispatcher to invoke analyzer
@@ -82,7 +82,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
 #       {
 #         Effect   = "Allow"
 #         Action   = "lambda:InvokeFunction"
-#         Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production"
+#         Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_s3canner_analyzer:Production"
 #       }
 #     ]
 #   })
@@ -90,7 +90,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
 
 # resource "aws_iam_role_policy_attachment" "allow_invoke_analyzer" {
 #   policy_arn = aws_iam_policy.allow_invoke_analyzer.arn
-#   role       = "hg_objalert_dispatcher_role"
+#   role       = "hg_s3canner_dispatcher_role"
 # }
 
 # // Allow sqs to get attributes to get the number of messages 
@@ -132,7 +132,7 @@ resource "aws_iam_policy" "lambda_policy" {
       {
         Effect   = "Allow"
         Action   = "lambda:InvokeFunction"
-        Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_objalert_analyzer:Production"
+        Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_s3canner_analyzer:Production"
       },
       {
         Effect = "Allow"
@@ -148,13 +148,13 @@ resource "aws_iam_policy" "lambda_policy" {
 
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   policy_arn = aws_iam_policy.lambda_policy.arn
-  role       = "hg_objalert_dispatcher_role"
+  role       = "hg_s3canner_dispatcher_role"
 }
 
 // Create the analyzer Lambda function.
-module "objalert_analyzer" {
+module "s3canner_analyzer" {
   source          = "./modules/lambda"
-  function_name   = "${var.name_prefix}_objalert_analyzer"
+  function_name   = "${var.name_prefix}_s3canner_analyzer"
   description     = "Analyze a obj with a set of YARA rules"
   base_policy_arn = aws_iam_policy.base_policy.arn
   handler         = "main.analyze_lambda_handler"
@@ -163,9 +163,9 @@ module "objalert_analyzer" {
   filename        = "lambda_analyzer.zip"
 
   environment_variables = {
-    S3_BUCKET_NAME                 = "${aws_s3_bucket.objalert_binaries.id}"
+    S3_BUCKET_NAME                 = "${aws_s3_bucket.s3canner_binaries.id}"
     SQS_QUEUE_URL                  = "${aws_sqs_queue.s3_object_queue.id}"
-    YARA_MATCHES_DYNAMO_TABLE_NAME = "${aws_dynamodb_table.objalert_yara_matches.name}"
+    YARA_MATCHES_DYNAMO_TABLE_NAME = "${aws_dynamodb_table.s3canner_yara_matches.name}"
     YARA_ALERTS_SNS_TOPIC_ARN      = "${aws_sns_topic.yara_match_alerts.arn}"
   }
 

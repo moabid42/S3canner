@@ -2,7 +2,7 @@ import boto3
 import os
 
 # Configure the S3 bucket and object key
-bucket_name = "hg.objalert-binaries.eu-central-1"
+bucket_name = "hg.s3canner-binaries.eu-central-1"
 file_path = "./file"  # Replace with your local file path
 object_key = os.path.basename(file_path)
 

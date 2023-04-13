@@ -17,23 +17,23 @@ data "aws_iam_policy_document" "base_policy" {
 }
 
 resource "aws_iam_policy" "base_policy" {
-  name   = "${var.name_prefix}_objalert_base_policy"
+  name   = "${var.name_prefix}_s3canner_base_policy"
   policy = data.aws_iam_policy_document.base_policy.json
 }
 
-data "aws_iam_policy_document" "objalert_batcher_policy" {
+data "aws_iam_policy_document" "s3canner_batcher_policy" {
   statement {
-    sid       = "InvokeObjAlertBatcher"
+    sid       = "InvokeS3cannerBatcher"
     effect    = "Allow"
     actions   = ["lambda:InvokeFunction"]
-    resources = ["${module.objalert_batcher.function_arn}"]
+    resources = ["${module.s3canner_batcher.function_arn}"]
   }
 
   statement {
-    sid       = "ListObjAlertBucket"
+    sid       = "ListS3cannerBucket"
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = ["${aws_s3_bucket.objalert_binaries.arn}"]
+    resources = ["${aws_s3_bucket.s3canner_binaries.arn}"]
   }
 
   statement {
@@ -44,18 +44,18 @@ data "aws_iam_policy_document" "objalert_batcher_policy" {
   }
 }
 
-resource "aws_iam_role_policy" "objalert_batcher_policy" {
-  name   = "${var.name_prefix}_objalert_batcher_policy"
-  role   = module.objalert_batcher.role_id
-  policy = data.aws_iam_policy_document.objalert_batcher_policy.json
+resource "aws_iam_role_policy" "s3canner_batcher_policy" {
+  name   = "${var.name_prefix}_s3canner_batcher_policy"
+  role   = module.s3canner_batcher.role_id
+  policy = data.aws_iam_policy_document.s3canner_batcher_policy.json
 }
 
-data "aws_iam_policy_document" "objalert_dispatcher_policy" {
+data "aws_iam_policy_document" "s3canner_dispatcher_policy" {
   statement {
-    sid       = "InvokeObjAlertAnalyzer"
+    sid       = "InvokeS3cannerAnalyzer"
     effect    = "Allow"
     actions   = ["lambda:InvokeFunction"]
-    resources = ["${module.objalert_analyzer.function_arn}"]
+    resources = ["${module.s3canner_analyzer.function_arn}"]
   }
 
   statement {
@@ -71,13 +71,13 @@ data "aws_iam_policy_document" "objalert_dispatcher_policy" {
   }
 }
 
-resource "aws_iam_role_policy" "objalert_dispatcher_policy" {
-  name   = "${var.name_prefix}_objalert_dispatcher_policy"
-  role   = module.objalert_dispatcher.role_id
-  policy = data.aws_iam_policy_document.objalert_dispatcher_policy.json
+resource "aws_iam_role_policy" "s3canner_dispatcher_policy" {
+  name   = "${var.name_prefix}_s3canner_dispatcher_policy"
+  role   = module.s3canner_dispatcher.role_id
+  policy = data.aws_iam_policy_document.s3canner_dispatcher_policy.json
 }
 
-data "aws_iam_policy_document" "objalert_analyzer_policy" {
+data "aws_iam_policy_document" "s3canner_analyzer_policy" {
   statement {
     sid    = "QueryAndUpdateDynamo"
     effect = "Allow"
@@ -88,14 +88,14 @@ data "aws_iam_policy_document" "objalert_analyzer_policy" {
       "dynamodb:UpdateItem",
     ]
 
-    resources = ["${aws_dynamodb_table.objalert_yara_matches.arn}"]
+    resources = ["${aws_dynamodb_table.s3canner_yara_matches.arn}"]
   }
 
   statement {
-    sid       = "GetFromObjAlertBucket"
+    sid       = "GetFromS3cannerBucket"
     effect    = "Allow"
     actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.objalert_binaries.arn}/*"]
+    resources = ["${aws_s3_bucket.s3canner_binaries.arn}/*"]
   }
 
   statement {
@@ -113,8 +113,8 @@ data "aws_iam_policy_document" "objalert_analyzer_policy" {
   }
 }
 
-resource "aws_iam_role_policy" "objalert_analyzer_policy" {
-  name   = "${var.name_prefix}_objalert_analyzer_policy"
-  role   = module.objalert_analyzer.role_id
-  policy = data.aws_iam_policy_document.objalert_analyzer_policy.json
+resource "aws_iam_role_policy" "s3canner_analyzer_policy" {
+  name   = "${var.name_prefix}_s3canner_analyzer_policy"
+  role   = module.s3canner_analyzer.role_id
+  policy = data.aws_iam_policy_document.s3canner_analyzer_policy.json
 }

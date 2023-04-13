@@ -2,7 +2,7 @@ import boto3
 import os
 import time  # Configure the S3 bucket and object key
 
-bucket_name = "hg.objalert-binaries.eu-central-1"
+bucket_name = "hg.s3canner-binaries.eu-central-1"
 file_path = "./file"  # Replace with your local file path
 object_key = os.path.basename(file_path)  # Upload the file to S3
 s3 = boto3.client("s3")
@@ -11,7 +11,7 @@ print(
     f"Uploaded file {file_path} to bucket {bucket_name} with key {object_key}"
 )  # Configure the Lambda function name
 # lambda_function_name = (
-#     "hg-objalert-batcher"  # Replace with your Lambda function name
+#     "hg-s3canner-batcher"  # Replace with your Lambda function name
 # )
 # # Create a test event to simulate the S3 PUT event
 # test_event = {
