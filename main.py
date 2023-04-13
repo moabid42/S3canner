@@ -55,6 +55,17 @@ LAMBDA_ALIASES_TERRAFORM_TARGETS = [
 
 ''' Core function '''
 
+def banner() -> None:
+    print("""
+    .oOOOo.                                                 
+    o     o  .oOOo.                                         
+    O.            O                                         
+     `OOoo.       o                                         
+          `O   .oO  .oOo  .oOoO' 'OoOo. 'OoOo. .oOo. `OoOo. 
+           o      o O     O   o   o   O  o   O OooO'  o     
+    O.    .O      O o     o   O   O   o  O   o O      O     
+     `oooO'  `OooO' `OoO' `OoO'o  o   O  o   O `OoO'  o     v1.0\n""")
+
 def deploy() -> None:
     # Deploy S3canner. Equivalent to test + build + apply
     test()
@@ -150,7 +161,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter) # Here we are using the formatter class for more help output readability
     parser.add_argument(
         'command',
-        choices =   ['deploy', 'test', 'build', 'apply'],
+        choices =   ['deploy', 'banner', 'test', 'build', 'apply'],
         help    =   'deploy        Deploy S3canner. Equivalent to test + build + apply.\n'
                     'test          Run unit tests.\n'
                     'build         Build Lambda packages (saves *.zip files in terraform/).\n'

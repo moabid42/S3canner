@@ -22,6 +22,10 @@ This project is about creating a serverless AWS pipeline where any object added 
       SQS_URL = "your url here"
       ```
   4. Makefile guide:
+      - If you are initializing the tool for the first time, you should create the backend state using :
+      ```bash
+        make backend
+      ```
       - You can deploy using :
       ```bash
         make
@@ -42,6 +46,11 @@ This project is about creating a serverless AWS pipeline where any object added 
       ```bash
         make destroy
       ```
+      - You can destroy the backend state (not recommended):
+      ```bash
+        make backend-destory
+      ```
+  5. *After creating the tool enviroment, you have to subscribed manually to your desired **SNS Protocol**, in the console*.
 
 ## Architecture
 ![smth](./img/newchart.png)
