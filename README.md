@@ -17,11 +17,7 @@ This project is about creating a serverless AWS pipeline where any object added 
       export AWS_ACCESS_KEY_ID="access-key"
       export AWS_SECRET_ACCESS_KEY="secret-key"
       ```
-  3. Add the enviroment variable `.env`, which should contain
-      ```bash
-      SQS_URL = "your url here"
-      ```
-  4. Makefile guide:
+  3. Makefile guide:
       - If you are initializing the tool for the first time, you should create the backend state using :
       ```bash
         make backend
@@ -51,6 +47,10 @@ This project is about creating a serverless AWS pipeline where any object added 
         make backend-destory
       ```
   5. *After creating the tool enviroment, you have to subscribed manually to your desired **SNS Protocol**, in the console*.
+  6. For testing purposes add the enviroment variable `.env`, which should contain
+      ```bash
+      SQS_URL = "your url here"
+      ```
 
 ## Architecture
 ![smth](./img/newchart.png)
@@ -78,4 +78,6 @@ This module consists of several resources, including an IAM policy document, an 
 - S3Buckets
 - Lambda functions
 
-For more details about the infrastructure you can check the terraform folder.
+`For more details about the infrastructure you can check the readme in the terraform folder.`
+
+`And for more info regarding the lambda functions check the readme in the lambda_functions folder.`
