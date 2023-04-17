@@ -1,6 +1,7 @@
 .terraform*
 err*
 lambda*.zip
+secrets_*.zip
 *.tfstate*
 tfplane
 .env

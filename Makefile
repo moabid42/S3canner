@@ -6,7 +6,7 @@ RED		=\033[31m
 RESET	=\033[0m
 
 deploy: banner require
-	@if python3 main.py deploy > /dev/null & bash ./utils/spin.sh; then \
+	@if python3 main.py deploy ; then \
 		echo "Deployment succeeded!"; \
 	else \
 		echo "Deployment failed. You may have forgotten to set your credentials."; \
@@ -62,7 +62,7 @@ help: banner
 destroy:
 	@terraform -chdir=$(TERRAFORM_ROOT) destroy
 
-backend-destory:
+backend-destroy:
 	@terraform -chdir=$(BACKEND_DIR) destroy
 
 .PHONY: all deploy test build apply require terraform backend destroy banner

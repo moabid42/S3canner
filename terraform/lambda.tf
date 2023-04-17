@@ -72,57 +72,6 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
   qualifier     = module.s3canner_dispatcher.alias_name
 }
 
-# // Allow dispatcher to invoke analyzer
-# resource "aws_iam_policy" "allow_invoke_analyzer" {
-#   name_prefix = "allow_invoke_analyzer_"
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Effect   = "Allow"
-#         Action   = "lambda:InvokeFunction"
-#         Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_s3canner_analyzer:Production"
-#       }
-#     ]
-#   })
-# }
-
-# resource "aws_iam_role_policy_attachment" "allow_invoke_analyzer" {
-#   policy_arn = aws_iam_policy.allow_invoke_analyzer.arn
-#   role       = "hg_s3canner_dispatcher_role"
-# }
-
-# // Allow sqs to get attributes to get the number of messages 
-# resource "aws_iam_role_policy" "lambda_sqs_policy" {
-#   name   = "lambda_sqs_policy"
-#   role   = aws_iam_role.lambda_role.id
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Effect   = "Allow"
-#         Action   = [
-#           "sqs:GetQueueAttributes",
-#           "sqs:SendMessage"
-#         ]
-#         Resource = "arn:aws:sqs:eu-central-1:*:*"
-#         Condition = {
-#           StringEquals = {
-#             "aws:SourceArn": aws_lambda_function.lambda_function.arn
-#           }
-#         }
-#       },
-#     ]
-#   })
-# }
-
-# resource "aws_iam_role_policy_attachment" "lambda_sqs_policy_attachment" {
-#   policy_arn = aws_iam_role_policy.lambda_sqs_policy.arn
-#   role       = aws_iam_role.lambda_role.name
-# }
-
 resource "aws_iam_policy" "lambda_policy" {
   name_prefix = "lambda_policy_"
 
@@ -133,6 +82,11 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect   = "Allow"
         Action   = "lambda:InvokeFunction"
         Resource = "arn:aws:lambda:eu-central-1:375140005095:function:hg_s3canner_analyzer:Production"
+      },
+      {
+        Effect   = "Allow"
+        Action   = "lambda:InvokeFunction"
+        Resource = module.s3canner_secrets_analyzer.alias_arn
       },
       {
         Effect = "Allow"
@@ -167,6 +121,41 @@ module "s3canner_analyzer" {
     SQS_QUEUE_URL                  = "${aws_sqs_queue.s3_object_queue.id}"
     YARA_MATCHES_DYNAMO_TABLE_NAME = "${aws_dynamodb_table.s3canner_yara_matches.name}"
     YARA_ALERTS_SNS_TOPIC_ARN      = "${aws_sns_topic.yara_match_alerts.arn}"
+  }
+
+  log_retention_days = var.lambda_log_retention_days
+  tagged_name        = var.tagged_name
+  // During batch operations, the analyzer will have a high error rate because of S3 latency.
+  alarm_errors_help = <<EOF
+If (a) the number of errors is not growing unbounded,
+(b) the errors are correlated with a rise in S3 download latency, and
+(c) the batcher is currently running (e.g. after a deploy),
+then you can resolve this alert (and consider increasing the threshold for this alarm).
+Otherwise, there is an unknown problem with the analyzers (which may still be related to S3).
+EOF
+
+  alarm_errors_threshold     = 50
+  alarm_errors_interval_secs = 300
+  alarm_sns_arns             = ["${aws_sns_topic.metric_alarms.arn}"]
+}
+
+
+// Create the secrests and sensitive informations analyzer Lambda function.
+module "s3canner_secrets_analyzer" {
+  source          = "./modules/lambda"
+  function_name   = "${var.name_prefix}_s3canner_secrets_analyzer"
+  description     = "Analyze an obj with thrufflehog"
+  base_policy_arn = aws_iam_policy.base_policy.arn
+  handler         = "main.secrets_analyze_lambda_handler"
+  memory_size_mb  = var.lambda_analyze_memory_mb
+  timeout_sec     = var.lambda_analyze_timeout_sec
+  filename        = "secrets_lambda_analyzer.zip"
+
+  environment_variables = {
+    S3_BUCKET_NAME                    = "${aws_s3_bucket.s3canner_binaries.id}"
+    SQS_QUEUE_URL                     = "${aws_sqs_queue.s3_object_queue.id}"
+    SECRETS_MATCHES_DYNAMO_TABLE_NAME = "${aws_dynamodb_table.s3canner_secrets_matches.name}"
+    SECRETS_ALERTS_SNS_TOPIC_ARN      = "${aws_sns_topic.secrets_match_alerts.arn}"
   }
 
   log_retention_days = var.lambda_log_retention_days

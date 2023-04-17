@@ -29,6 +29,10 @@ TERRAFORM_CONFIG = os.path.join(TERRAFORM_DIR, 'terraform.tfvars')
 ANALYZE_LAMBDA_DIR = os.path.join(PROJ_DIR, 'lambda_functions', 'analyzer_function')
 ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'lambda_analyzer') 
 
+# Secrets Analyzer Lambda function source and zip package
+SECRETS_ANALYZE_LAMBDA_DIR = os.path.join(PROJ_DIR, 'lambda_functions', 'secrets_analyzer_function', 'main.py')
+SECRETS_ANALYZE_LAMBDA_PACKAGE = os.path.join(TERRAFORM_DIR, 'secrets_lambda_analyzer.zip') 
+
 # Yara Analyzer dependencies
 YARA_DIR = os.path.join(CORE_DIR, 'rules')
 ANALYZE_LAMBDA_DEPENDENCIES =  os.path.join(ANALYZE_LAMBDA_DIR, 'yara_python_3.6.3.zip')
@@ -50,7 +54,7 @@ LAYER_DIR = os.path.join(CORE_DIR, 'rules', 'python')
 # Lambda alias terraform targets, to be updated separately.
 LAMBDA_ALIASES_TERRAFORM_TARGETS = [
     '-target=module.{}s3canner_{}.aws_lambda_alias.production_alias'.format(NAME_PREFIX, name)
-    for name in ['analyzer', 'batcher', 'dispatcher']
+    for name in ['analyzer', 'batcher', 'dispatcher', 'secrets_analyzer']
 ]
 
 ''' Core function '''
@@ -93,15 +97,6 @@ def build_analyser_():
     # Clone the YARA-rules repo and compile the YARA rules
     compile_rules(os.path.join(ANALYZE_LAMBDA_DIR, COMPILED_RULES_FILENAME))
 
-    # Add the layer directory to the ANALYZE_LAMBDA_DEPENDENCIES folder
-    # with zipfile.ZipFile(ANALYZE_LAMBDA_DEPENDENCIES, 'w') as deps:
-    #     for root, dirs, files in os.walk(ANALYZE_LAMBDA_DIR):
-    #         for file in files:
-    #             deps.write(os.path.join(root, file))
-
-    #     for root, dirs, files in os.walk(LAYER_DIR):
-    #         for file in files:
-    #             deps.write(os.path.join(root, file))
     # Build the YARA analyser Lambda deplyment package
     print('Creating analyzer deploy package...')
     with zipfile.ZipFile(ANALYZE_LAMBDA_DEPENDENCIES, 'r') as deps:
@@ -112,8 +107,15 @@ def build_analyser_():
     # Zip up the package
     shutil.make_archive(ANALYZE_LAMBDA_PACKAGE, 'zip', ANALYZE_LAMBDA_DIR)
 
+def build_secrets_analyser_():
+    # Build the SECRETS analyzer Lambda deployment package
+    print('Creating secrets analyzer deploy package...')
+    with zipfile.ZipFile(SECRETS_ANALYZE_LAMBDA_PACKAGE, 'w') as pkg:
+        pkg.write(SECRETS_ANALYZE_LAMBDA_DIR, os.path.basename(SECRETS_ANALYZE_LAMBDA_DIR))
+
 def build() -> None:
     # Build the Lambda deployment packages
+    build_secrets_analyser_()
     build_analyser_()
     build_batcher_()
     build_dispatcher_() # I use _ in the end based on google standards 

@@ -7,3 +7,8 @@ resource "aws_sns_topic" "yara_match_alerts" {
 resource "aws_sns_topic" "metric_alarms" {
   name = "${var.name_prefix}_s3canner_metric_alarms"
 }
+
+// Sensitive match alerts will be published to this SNS topic.
+resource "aws_sns_topic" "secrets_match_alerts" {
+  name = "${var.name_prefix}_s3canner_secrets_match_alerts"
+}
