@@ -51,10 +51,12 @@ module "s3canner_dispatcher" {
   filename        = "lambda_dispatcher.zip"
 
   environment_variables = {
-    ANALYZE_LAMBDA_NAME      = "${module.s3canner_analyzer.function_name}"
-    ANALYZE_LAMBDA_QUALIFIER = "${module.s3canner_analyzer.alias_name}"
-    MAX_DISPATCHES           = "${var.lambda_dispatch_limit}"
-    SQS_QUEUE_URL            = "${aws_sqs_queue.s3_object_queue.id}"
+    ANALYZE_LAMBDA_NAME              = "${module.s3canner_analyzer.function_name}"
+    ANALYZE_LAMBDA_QUALIFIER         = "${module.s3canner_analyzer.alias_name}"
+    SECRETS_ANALYZE_LAMBDA_NAME      = "${module.s3canner_secrets_analyzer.function_name}"
+    SECRETS_ANALYZE_LAMBDA_QUALIFIER = "${module.s3canner_secrets_analyzer.alias_name}"
+    MAX_DISPATCHES                   = "${var.lambda_dispatch_limit}"
+    SQS_QUEUE_URL                    = "${aws_sqs_queue.s3_object_queue.id}"
   }
 
   log_retention_days = var.lambda_log_retention_days

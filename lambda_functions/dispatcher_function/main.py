@@ -14,12 +14,14 @@ LAMBDA_CLIENT = boto3.client('lambda')
 SQS_CLIENT = boto3.client('sqs')
 
 # Constants
-WAIT_TIME_SECONDS       = 10
-BATCH_SIZE              = 10    # SQS maximum allowable
-SQS_QUEUE_URL           = os.getenv('SQS_QUEUE_URL')
-MAX_DISPATCHES          = int(os.getenv('MAX_DISPATCHES'))
-ANALYZE_LAMBDA_NAME     = os.getenv('ANALYZE_LAMBDA_NAME')
-ANALYZE_LAMBDA_QUALIFER = os.getenv('ANALYZE_LAMBDA_QUALIFIER')
+WAIT_TIME_SECONDS               = 10
+BATCH_SIZE                      = 10    # SQS maximum allowable
+SQS_QUEUE_URL                   = os.getenv('SQS_QUEUE_URL')
+MAX_DISPATCHES                  = int(os.getenv('MAX_DISPATCHES'))
+ANALYZE_LAMBDA_NAME             = os.getenv('ANALYZE_LAMBDA_NAME')
+ANALYZE_LAMBDA_QUALIFER         = os.getenv('ANALYZE_LAMBDA_QUALIFIER')
+SECRETS_ANALYZE_LAMBDA_NAME     = os.getenv('SECRETS_ANALYZE_LAMBDA_NAME')
+SECRETS_ANALYZE_LAMBDA_QUALIFER = os.getenv('SECRETS_ANALYZE_LAMBDA_QUALIFIER')
 WAIT_TIME_SECONDS       = 10    # Maximum amount of time to hold a 
                                 # receive_message connection open.
 
@@ -38,6 +40,15 @@ def invoke_analysis_lambda(payload: dict) -> None:
         InvocationType  = 'Event',
         Payload         = json.dumps(payload),
         Qualifier       = ANALYZE_LAMBDA_QUALIFER
+    )
+
+# Invoke an analysis Lambda asynchronously
+def invoke_secrets_analysis_lambda(payload: dict) -> None:
+    LAMBDA_CLIENT.invoke(
+        FunctionName    = SECRETS_ANALYZE_LAMBDA_NAME,
+        InvocationType  = 'Event',
+        Payload         = json.dumps(payload),
+        Qualifier       = SECRETS_ANALYZE_LAMBDA_QUALIFER
     )
 
 # Receive a message from the SQS service
@@ -141,6 +152,12 @@ def dispatch_lambda_handler(_, lambda_context) -> int:
 
         # Asynchronously invoke an analyzer lambda.
         invoke_analysis_lambda(payload)
+
+        LOGGER.info('Sending %d object(s) to an analyzer: %s',
+            len(payload['S3Objects']), json.dumps(payload['S3Objects']))
+
+        # Asynchronously invoke an secrets analyzer lambda.
+        invoke_secrets_analysis_lambda(payload)
 
         # delete_sqs_messages(os.environ['SQS_QUEUE_URL'], payload['S3Objects'])
         invocations += 1
