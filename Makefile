@@ -6,38 +6,26 @@ RED		=\033[31m
 RESET	=\033[0m
 
 deploy: latest_version_init banner require
-	@if python3 main.py deploy ; then \
-		echo "Deployment succeeded!"; \
-	else \
-		echo "Deployment failed. You may have forgotten to set your credentials."; \
-	fi	
+	@python3 main.py deploy ;
+	@echo "Deployment succeeded!";
 
 latest_version_init:
-	bash ./utils/latest_version.sh 
+	@bash ./utils/latest_version.sh 
 
 banner:
 	@python3 main.py banner 
 
 test: banner
-	@if python3 main.py test > /dev/null; then \
-		echo "Testing succeeded!"; \
-	else \
-		echo "Testing failed. You may have forgotten to set your credentials."; \
-	fi
+	@python3 main.py test > /dev/null;
+	@echo "Testing succeeded!";
 
 build: banner
-	@if python3 main.py build > /dev/null; then \
-		echo "Building succeeded!"; \
-	else \
-		echo "Building failed. You may have forgotten to set your credentials."; \
-	fi
+	@python3 main.py build > /dev/null;
+	@echo "Building succeeded!";
 
 apply: banner
-	@if python3 main.py apply > /dev/null; then \
-		echo "Applying succeeded!"; \
-	else \
-		echo "Applying failed. You may have forgotten to set your credentials."; \
-	fi
+	@python3 main.py apply > /dev/null;
+	@echo "Applying succeeded!";
 
 require:
 	@pip install -r requirements.txt > /dev/null

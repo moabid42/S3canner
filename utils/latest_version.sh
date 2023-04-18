@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Terraform var file
-terraform_var="../terraform/modules/lambda/variables.tf"
+terraform_var="./terraform/modules/lambda/variables.tf"
 
 # The current python runtime version
 pv=$(cat $terraform_var | grep python | grep -oP '(?<=python)\d+\.\d+' )

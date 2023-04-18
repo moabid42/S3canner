@@ -93,9 +93,16 @@ def build_dispatcher_():
     with zipfile.ZipFile(DISPATCH_LAMBDA_PACKAGE, 'w') as pkg:
         pkg.write(DISPATCH_LAMBDA_SOURCE, os.path.basename(DISPATCH_LAMBDA_SOURCE))
 
-def build_analyser_():
+def build_yara_server():
     # Clone the YARA-rules repo and compile the YARA rules
     compile_rules(os.path.join(ANALYZE_LAMBDA_DIR, COMPILED_RULES_FILENAME))
+
+    # here we can call the manager and init an instance of central yara project which
+    # should serve and update the s3 bucket with the latest yara rules as a server
+
+def build_analyser_():
+    # Build central yara bucket
+    build_yara_server()
 
     # Build the YARA analyser Lambda deplyment package
     print('Creating analyzer deploy package...')
@@ -150,24 +157,12 @@ def config_to_dic():
 
 
 def main() -> None:
-    # Check if environment variables are set
-    access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
-    secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    session_token = os.environ.get('AWS_SESSION_TOKEN')
-    if not all([access_key_id, secret_access_key, session_token]):
-        error_msg = "Error: AWS environment variables are not set"
-        LOGGER.error(error_msg)
-        raise ValueError(error_msg)
-
     # Arg parsing
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter) # Here we are using the formatter class for more help output readability
     parser.add_argument(
         'command',
-        choices =   ['deploy', 'banner', 'test', 'build', 'apply'],
-        help    =   'deploy        Deploy S3canner. Equivalent to test + build + apply.\n'
-                    'test          Run unit tests.\n'
-                    'build         Build Lambda packages (saves *.zip files in terraform/).\n'
-                    'apply         Terraform validate and apply any configuration/package changes.\n')
+        choices =   ['deploy', 'banner', 'test', 'build', 'apply']
+    )
     args = parser.parse_args()
 
     # Config load

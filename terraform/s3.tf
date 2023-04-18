@@ -102,7 +102,7 @@ resource "aws_s3_bucket" "s3canner_binaries" {
 
     // Old/deleted object versions are permanently removed after 1 day.
     noncurrent_version_expiration {
-      days = 1
+      days = 7
     }
   }
 
@@ -118,10 +118,47 @@ resource "aws_s3_bucket" "s3canner_binaries" {
   tags = {
     Name = "S3canner"
   }
+
   versioning {
     enabled = true
   }
+
   force_destroy = true
+}
+
+// Central yara-rules bucket
+resource "aws_s3_bucket" "yara_rules_bucket" {
+  bucket = "${var.name_prefix}.s3canner-yara-rules.${var.aws_region}"
+  acl    = "private"
+
+  # Do we have to encrypt this ? IDK
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+  tags = {
+    Name = "S3canner"
+  }
+
+  versioning {
+    enabled = true
+  }
+
+  force_destroy = true
+}
+
+// Blocking public access to S3 buckets in case of overwrite of the the rules
+resource "aws_s3_bucket_public_access_block" "block_yara_rules_bucket" {
+  bucket = aws_s3_bucket.yara_rules_bucket.id
+
+  restrict_public_buckets = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
 }
 
 // Blocking public access to S3 buckets
