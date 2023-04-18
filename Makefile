@@ -5,12 +5,15 @@ GREEN	=\033[32m
 RED		=\033[31m
 RESET	=\033[0m
 
-deploy: banner require
+deploy: latest_version_init banner require
 	@if python3 main.py deploy ; then \
 		echo "Deployment succeeded!"; \
 	else \
 		echo "Deployment failed. You may have forgotten to set your credentials."; \
 	fi	
+
+latest_version_init:
+	bash ./utils/latest_version.sh 
 
 banner:
 	@python3 main.py banner 

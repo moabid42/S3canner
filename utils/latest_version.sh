@@ -1,11 +1,16 @@
 #!/bin/bash
 
+# Terraform var file
+terraform_var="../terraform/modules/lambda/variables.tf"
+
+# The current python runtime version
+pv=$(cat $terraform_var | grep python | grep -oP '(?<=python)\d+\.\d+' )
+previous_version="python$pv"
 
 # get the runtimes from the botocore source code 
-lambda_runtimes=$(curl -s https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html \
-    | pup '.table-container' | pup ':parent-of(:parent-of(:parent-of(:parent-of(:contains("Supported")))))' \
-    | pup 'tbody code text{}' | sed '/^[[:space:]]*$/d' | tr -d ' ' | grep python)
+RuntimeVersionsURL="https://raw.githubusercontent.com/boto/botocore/develop/botocore/data/lambda/2015-03-31/service-2.json"
+latest_version=$(curl -s $RuntimeVersionsURL | jq -r '.shapes.Runtime.enum[]' | grep python | tr ' ' '\n' | sort -r | head -n 1)
 
-lambda_latest_runtime_version=$(echo $lambda_runtimes | sort -r | head -n 1)
+# Replace the value of sedme in the python_runtime_version variable definition with the value of the MYVAR environment variable
+sed -i -e "s/$previous_version/$latest_version/g" $terraform_var
 
-echo "The latest is : $lambda_latest_runtime_version"
