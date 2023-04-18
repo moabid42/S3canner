@@ -1,3 +1,29 @@
+// Create a KMS key for SQS service
+resource "aws_kms_key" "s3_object_queue_key" {
+  description             = "KMS key for the s3_object_queue SQS queue"
+  deletion_window_in_days = 7
+}
+
+resource "aws_kms_key_policy" "s3_object_queue_key_policy" {
+  policy = jsonencode({
+    Version : "2012-10-17",
+    Statement : [
+      {
+        Sid : "Allow all actions",
+        Effect : "Allow",
+        Principal : {
+          AWS : "*"
+        },
+        Action : "kms:*",
+        Resource : "*"
+      }
+    ]
+  })
+
+  key_id = aws_kms_key.s3_object_queue_key.key_id
+}
+
+
 // Queue of S3 objects to be analyzed.
 resource "aws_sqs_queue" "s3_object_queue" {
   name = "${var.name_prefix}_s3canner_s3_object_queue"
@@ -7,6 +33,8 @@ resource "aws_sqs_queue" "s3_object_queue" {
   visibility_timeout_seconds = format("%d", var.lambda_analyze_timeout_sec + 2)
 
   message_retention_seconds = format("%d", var.sqs_retention_minutes * 60)
+
+  kms_master_key_id = aws_kms_key.s3_object_queue_key.arn
 }
 
 data "aws_iam_policy_document" "s3_object_queue_policy" {

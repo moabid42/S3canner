@@ -78,7 +78,7 @@ class BinaryInfo(object):
         self.object_key = object_key
         self.s3_identifier = 'S3:{}:{}'.format(bucket_name, object_key)
 
-        self.download_path = '/tmp/binaryalert_{}'.format(str(uuid.uuid4()))
+        self.download_path = '/tmp/s3canner_{}'.format(str(uuid.uuid4()))
         self.yara_analyzer = yara_analyzer
 
         # Computed after file download and analysis.

@@ -51,3 +51,5 @@ variable "s3_log_expiration_days" {
 }
 variable "lambda_log_retention_days" {
 }
+variable "binaries_expiration_time" {
+}

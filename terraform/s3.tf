@@ -1,22 +1,3 @@
-// S3 Bucket the store the backend state
-# resource "aws_s3_bucket" "backend_state_bucket" {
-#   bucket = "hg-terraform-state-s3canner"
-#   acl    = "private"
-#   region = "eu-central-1"
-
-#   versioning {
-#     enabled = true
-#   }
-
-#   server_side_encryption_configuration {
-#     rule {
-#       apply_server_side_encryption_by_default {
-#         sse_algorithm = "AES256"
-#       }
-#     }
-#   }
-# }
-
 // S3 bucket for storing access logs.
 resource "aws_s3_bucket" "s3canner_log_bucket" {
   count = var.s3_log_bucket == "" ? 1 : 0 // Create only if no pre-existing log bucket.
@@ -45,11 +26,13 @@ resource "aws_s3_bucket" "s3canner_log_bucket" {
     }
   }
 
-  // Enable logging on the logging bucket itself.
-  logging {
-    // The target bucket is the same as the name of this bucket.
-    target_bucket = format("%s.s3canner-binaries.%s.access-logs", var.name_prefix, var.aws_region)
-    target_prefix = "self/"
+  # No need for kms key for just logging bucket
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
   }
 
   tags = {
@@ -63,6 +46,36 @@ resource "aws_s3_bucket" "s3canner_log_bucket" {
 
   force_destroy = true
 }
+
+# A must since all kind of files could end up here
+resource "aws_kms_key" "binaries_bucket_key" {
+  description             = "KMS key for s3canner binaries bucket"
+  deletion_window_in_days = 7
+}
+
+# resource "aws_kms_key_policy" "my_kms_key_policy" {
+#   key_id = aws_kms_key.binaries_bucket_key.id
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Sid    = "Allow S3 to write event messages to KMS-encrypted S3 bucket"
+#         Effect = "Allow"
+#         Principal = {
+#           Service = "s3.amazonaws.com"
+#         }
+#         Action = [
+#           "kms:GenerateDataKey*",
+#           "kms:Decrypt",
+#           "kms:ScheduleKeyDeletion"
+#         ]
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
+
 
 // Source S3 bucket: binaries uploaded here will be automatically analyzed.
 resource "aws_s3_bucket" "s3canner_binaries" {
@@ -92,6 +105,16 @@ resource "aws_s3_bucket" "s3canner_binaries" {
       days = 1
     }
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = aws_kms_key.binaries_bucket_key.arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
   tags = {
     Name = "S3canner"
   }
@@ -144,3 +167,4 @@ resource "aws_s3_bucket_notification" "lambda_bucket_notification" {
     filter_suffix       = ""
   }
 }
+

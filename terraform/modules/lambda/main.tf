@@ -47,10 +47,10 @@ resource "aws_lambda_function" "function" {
   description   = var.description
   handler       = var.handler
   role          = aws_iam_role.role[0].arn
-  runtime       = "python3.9"
+  runtime       = var.python_runtime_version
 
-  memory_size                    = var.memory_size_mb
-  timeout                        = var.timeout_sec
+  memory_size = var.memory_size_mb
+  timeout     = var.timeout_sec
   # reserved_concurrent_executions = var.reserved_concurrent_executions
 
   filename         = var.filename
@@ -104,7 +104,7 @@ EOF
 
 // Alarm if the Lambda function is ever throttled.
 resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
-  count = var.enabled
+  count      = var.enabled
   alarm_name = "${var.function_name}_throttles"
 
   alarm_description = <<EOF

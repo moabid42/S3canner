@@ -77,3 +77,8 @@ variable "alarm_sns_arns" {
   type        = list(string)
   description = "A list of SNS topic ARNs which will be notified when a metric alarm triggers"
 }
+
+variable "python_runtime_version" {
+  type    = string
+  default = "python3.9"
+}

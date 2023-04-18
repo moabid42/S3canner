@@ -60,3 +60,6 @@ s3_log_expiration_days = 60 # This is not used when existing S3 bucket is used
 
 // Lambda functions logs
 lambda_log_retention_days = 90
+
+// Expiration time of the binaries s3canner_binaries bucket
+binaries_expiration_time = 30
