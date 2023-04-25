@@ -65,6 +65,7 @@ data "aws_iam_policy_document" "s3canner_dispatcher_policy" {
     actions = [
       "sqs:DeleteMessage",
       "sqs:ReceiveMessage",
+      "sqs:GetQueueAttributes",
     ]
 
     resources = ["${aws_sqs_queue.s3_object_queue.arn}"]

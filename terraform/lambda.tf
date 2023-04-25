@@ -1,12 +1,3 @@
-// Declare archive_file data source in root module
-# data "archive_file" "lambda_functions" {
-#   for_each = var.lambda_functions
-
-#   type        = "zip"
-#   source_dir  = "../core/lambda_functions/${each.value}"
-#   output_path = "${path.module}/dist/${each.value}.zip"
-# }
-
 // Create the batch Lambda function.
 module "s3canner_batcher" {
   source          = "./modules/lambda"
@@ -64,15 +55,34 @@ module "s3canner_dispatcher" {
   tagged_name        = var.tagged_name
 }
 
-// Allow dispatcher to be invoked via a CloudWatch rule.3
-resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
-  statement_id  = "AllowExecutionFromCloudWatch_${module.s3canner_dispatcher.function_name}"
+
+// Map the Lambda function to the SQS queue
+resource "aws_lambda_event_source_mapping" "dispatcher_source_mapping" {
+  event_source_arn = aws_sqs_queue.s3_object_queue.arn
+  function_name    = module.s3canner_dispatcher.function_name
+  batch_size       = 10
+}
+
+resource "aws_lambda_permission" "dispacher_sqs_permission" {
+  statement_id  = "AllowSQS"
   action        = "lambda:InvokeFunction"
   function_name = module.s3canner_dispatcher.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
-  qualifier     = module.s3canner_dispatcher.alias_name
+  principal     = "sqs.amazonaws.com"
+
+  source_arn = aws_sqs_queue.s3_object_queue.arn
 }
+
+# // Allow dispatcher to be invoked via a CloudWatch rule.3
+# resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_dispatch" {
+#   statement_id  = "AllowExecutionFromCloudWatch_${module.s3canner_dispatcher.function_name}"
+#   action        = "lambda:InvokeFunction"
+#   function_name = module.s3canner_dispatcher.function_name
+#   principal     = "events.amazonaws.com"
+#   source_arn    = aws_cloudwatch_event_rule.dispatch_cronjob.arn
+#   qualifier     = module.s3canner_dispatcher.alias_name
+# }
+
+
 
 resource "aws_iam_policy" "lambda_policy" {
   name_prefix = "lambda_policy_"
@@ -94,7 +104,8 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect = "Allow"
         Action = [
           "sqs:GetQueueAttributes",
-          "sqs:SendMessage"
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes"
         ]
         Resource = "arn:aws:sqs:eu-central-1:*:*"
       },

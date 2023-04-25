@@ -82,60 +82,126 @@ Returns:
         'SQSReceipts': ['receipt1', 'receipt2', ...]
     }
     [None] if the SQS message was empty or invalid."""
-def _build_payload(sqs_messages):
-    if 'Records' not in sqs_messages:
-        LOGGER.info('No SQS messages found')
-        return
+# def _build_payload(sqs_messages):
+#     if 'Records' not in sqs_messages:
+#         LOGGER.info('No SQS Records found')
+#         return
 
+#     # The payload consists of S3 object keys and SQS receipts (consumers will delete the message).
+#     payload = {'S3Objects': [], 'SQSReceipts': []}
+#     invalid_receipts = []  # List of invalid SQS message receipts to delete.
+#     for msg in sqs_messages['Records']:
+#         try:
+#             payload['S3Objects'].extend(
+#                 record['s3']['object']['key'] for record in json.loads(msg['Body'])['Records'])
+#             payload['SQSReceipts'].append(msg['ReceiptHandle'])
+#         except (KeyError, ValueError):
+#             LOGGER.warning('Invalid SQS message body: %s', msg['Body'])
+#             invalid_receipts.append(msg['ReceiptHandle'])
+#             continue
+
+#     # Remove invalid messages from the SQS queue.
+#     if invalid_receipts:
+#         LOGGER.warning('Removing %d invalid messages', len(invalid_receipts))
+#         SQS_CLIENT.delete_message_batch(
+#             QueueUrl=os.environ['SQS_QUEUE_URL'],
+#             Entries=[{'Id': str(index), 'ReceiptHandle': receipt}
+#                      for index, receipt in enumerate(invalid_receipts)]
+#         )
+
+#     # If there were no valid S3 objects, return None.
+#     if not payload['S3Objects']:
+#         return
+
+#     return payload
+
+def _build_payload(sqs_messages):
+    # sqs_messages = json.loads(sqs_messages)
+    # if not sqs_messages :
+    #     LOGGER.info('No SQS Records found')
+    #     return None
+    
+
+    records = json.loads(sqs_messages)
     # The payload consists of S3 object keys and SQS receipts (consumers will delete the message).
     payload = {'S3Objects': [], 'SQSReceipts': []}
     invalid_receipts = []  # List of invalid SQS message receipts to delete.
-    for msg in sqs_messages['Records']:
-        try:
-            payload['S3Objects'].extend(
-                record['s3']['object']['key'] for record in json.loads(msg['body'])['Records'])
-            payload['SQSReceipts'].append(msg['receiptHandle'])
-        except (KeyError, ValueError):
-            LOGGER.warning('Invalid SQS message body: %s', msg['body'])
-            invalid_receipts.append(msg['receiptHandle'])
-            continue
+    # LOGGER.info('Records : ', sqs_messages['Records'])
+    # LOGGER.info('Records : ', sqs_messages['Records'][0])
+    LOGGER.info('Records : ', records['Records'][0]['messageId'])
+    LOGGER.info('Records : ', records['Records'][0]['receiptHandle'])
+    object_key = records['Records'][0]['body']
+    print(json.loads(object_key)['Records'][0]['s3']['object']['key'])
+    # for msg in sqs_messages['Records'][0]:
+    #     try:
+    #         payload['S3Objects'].append(msg['body']['Records'][0]['s3']['object']['key'])
+    #         payload['SQSReceipts'].append(msg['receiptHandle'])
+    #     except (KeyError, ValueError):
+    #         LOGGER.warning('Invalid SQS message body: %s', msg['body'])
+    #         invalid_receipts.append(msg['receiptHandle'])
+    #         continue
 
-    # Remove invalid messages from the SQS queue.
-    if invalid_receipts:
-        LOGGER.warning('Removing %d invalid messages', len(invalid_receipts))
-        # SQS_CLIENT.delete_message_batch(
-        #     QueueUrl=os.environ['SQS_QUEUE_URL'],
-        #     Entries=[{'Id': str(index), 'ReceiptHandle': receipt}
-        #              for index, receipt in enumerate(invalid_receipts)]
-        # )
+    # # Remove invalid messages from the SQS queue.
+    # if invalid_receipts:
+    #     LOGGER.warning('Removing %d invalid messages', len(invalid_receipts))
+    #     SQS_CLIENT.delete_message_batch(
+    #         QueueUrl=os.environ['SQS_QUEUE_URL'],
+    #         Entries=[{'Id': str(index), 'ReceiptHandle': receipt}
+    #                  for index, receipt in enumerate(invalid_receipts)]
+    #     )
 
-    # If there were no valid S3 objects, return None.
-    if not payload['S3Objects']:
-        return
+    # # If there were no valid S3 objects, return None.
+    # if not payload['S3Objects']:
+    #     return None
 
     return payload
 
 
+import json
+
+# def dispatch_lambda_handler(event, context):
+#     LOGGER.info(event)
+#     for record in event['Records']:
+#         message = json.loads(record['body'])
+#         records = message['Records']
+#         for r in records:
+#             s3_obj = r['s3']['object']
+#             key = s3_obj['key']
+#             LOGGER.info(f"Message body: {key}")
+#             LOGGER.info(f"Message content: {r}")
+
+
+
+
 def dispatch_lambda_handler(event, lambda_context) -> int:
-    invocations = 0
+    # Log and print the event information
+    event_json = json.dumps(event)
+    logging.info(f"Event:\n{event}")
+    logging.info(f"Event json:\n{event_json}")
+
+    
+    # # Log and print the context information
+    # context_json = json.dumps(vars(lambda_context), indent=2)
+    # logging.info(f"Context:\n{context_json}")
+    # invocations = 0
 
     # queue_attributes = SQS_CLIENT.get_queue_attributes(
     #     QueueUrl=os.environ['SQS_QUEUE_URL'],
     #     AttributeNames=['ApproximateNumberOfMessages']
     # )
-    # num_messages = int(event['attributes']['ApproximateRecieveCount'])
+    # LOGGER.info(queue_attributes)
+    # num_messages = int(queue_attributes['Attributes']['ApproximateNumberOfMessages'])
 
     # LOGGER.info('The number of messages is %d', num_messages)
 
-    # The maximum amount of time needed in the execution loop.
-    # This allows us to dispatch as long as possible while still staying under the time limit.
-    # We need time to wait for sqs messages as well as a few seconds (e.g. 3) to process them.
-    loop_execution_time_ms = (WAIT_TIME_SECONDS + 3) * 1000
+    # # The maximum amount of time needed in the execution loop.
+    # # This allows us to dispatch as long as possible while still staying under the time limit.
+    # # We need time to wait for sqs messages as well as a few seconds (e.g. 3) to process them.
+    # loop_execution_time_ms = (WAIT_TIME_SECONDS + 3) * 1000
 
     # Poll for messages until we either reach our invocation limit or run out of time.
     # while (num_messages > invocations and 
-    #        invocations < int(os.environ['MAX_DISPATCHES']) and
-    #        lambda_context.get_remaining_time_in_millis() > loop_execution_time_ms):
+    #        invocations < int(os.environ['MAX_DISPATCHES'])):
     #     # Long-polling of SQS: Wait up to 10 seconds and receive up to 10 messages.
     #     sqs_messages = SQS_CLIENT.receive_message(
     #         QueueUrl=os.environ['SQS_QUEUE_URL'],
@@ -144,17 +210,19 @@ def dispatch_lambda_handler(event, lambda_context) -> int:
     #     )
 
         # Validate the SQS message and construct the payload.
-    payload = _build_payload(event)
-    # if not payload:
-    #     continue
+    
+    payload = _build_payload(str(event))
+    LOGGER.info(payload)
+        # if not payload:
+        #     continue
     LOGGER.info('Sending %d object(s) to an analyzer: %s',
-                len(payload['S3Objects']), json.dumps(payload['S3Objects']))
+                    len(payload['S3Objects']), json.dumps(payload['S3Objects']))
 
         # Asynchronously invoke an analyzer lambda.
     invoke_analysis_lambda(payload)
 
     LOGGER.info('Sending %d object(s) to an analyzer: %s',
-        len(payload['S3Objects']), json.dumps(payload['S3Objects']))
+    len(payload['S3Objects']), json.dumps(payload['S3Objects']))
 
         # Asynchronously invoke an secrets analyzer lambda.
     invoke_secrets_analysis_lambda(payload)
@@ -164,3 +232,4 @@ def dispatch_lambda_handler(event, lambda_context) -> int:
 
     LOGGER.info('Invoked %d total analyzers', invocations)
     return invocations
+
