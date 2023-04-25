@@ -64,10 +64,11 @@ def receive_message_sqs(queue_url: str, wait_time_seconds: int) -> Optional[dict
 Args:
     sqs_messages: [dict] Response from SQS.receive_message. Expected format:
         {
-            'Messages': [
+            'Records': [
                 {
-                    'Body': '{"Records": [{"s3": {"object": {"key": "..."}}}, ...]}',
-                    'ReceiptHandle': '...'
+                    ...
+                    'body': '{"Records": [{"s3": {"object": {"key": "..."}}}, ...]}',
+                    'receiptHandle': '...'
                 },
                 ...
             ]
@@ -117,50 +118,21 @@ def _build_payload(sqs_messages):
 
 
 def dispatch_lambda_handler(event, lambda_context) -> int:
-    invocations = 0
-
-    # queue_attributes = SQS_CLIENT.get_queue_attributes(
-    #     QueueUrl=os.environ['SQS_QUEUE_URL'],
-    #     AttributeNames=['ApproximateNumberOfMessages']
-    # )
-    # num_messages = int(event['attributes']['ApproximateRecieveCount'])
-
-    # LOGGER.info('The number of messages is %d', num_messages)
-
-    # The maximum amount of time needed in the execution loop.
-    # This allows us to dispatch as long as possible while still staying under the time limit.
-    # We need time to wait for sqs messages as well as a few seconds (e.g. 3) to process them.
-    loop_execution_time_ms = (WAIT_TIME_SECONDS + 3) * 1000
-
-    # Poll for messages until we either reach our invocation limit or run out of time.
-    # while (num_messages > invocations and 
-    #        invocations < int(os.environ['MAX_DISPATCHES']) and
-    #        lambda_context.get_remaining_time_in_millis() > loop_execution_time_ms):
-    #     # Long-polling of SQS: Wait up to 10 seconds and receive up to 10 messages.
-    #     sqs_messages = SQS_CLIENT.receive_message(
-    #         QueueUrl=os.environ['SQS_QUEUE_URL'],
-    #         MaxNumberOfMessages=10,  # SQS maximum allowable.
-    #         WaitTimeSeconds=WAIT_TIME_SECONDS
-    #     )
-
-        # Validate the SQS message and construct the payload.
+    # Validate the SQS message and construct the payload.
     payload = _build_payload(event)
-    # if not payload:
-    #     continue
     LOGGER.info('Sending %d object(s) to an analyzer: %s',
                 len(payload['S3Objects']), json.dumps(payload['S3Objects']))
 
-        # Asynchronously invoke an analyzer lambda.
+    # Asynchronously invoke an analyzer lambda.
     invoke_analysis_lambda(payload)
 
     LOGGER.info('Sending %d object(s) to an analyzer: %s',
         len(payload['S3Objects']), json.dumps(payload['S3Objects']))
 
-        # Asynchronously invoke an secrets analyzer lambda.
+    # Asynchronously invoke an secrets analyzer lambda.
     invoke_secrets_analysis_lambda(payload)
 
-        # delete_sqs_messages(os.environ['SQS_QUEUE_URL'], payload['S3Objects'])
-    invocations += 1
+    # delete_sqs_messages(os.environ['SQS_QUEUE_URL'], payload['S3Objects'])
 
-    LOGGER.info('Invoked %d total analyzers', invocations)
-    return invocations
+    LOGGER.info('Invoked %d total analyzers', 1)
+    return 1
