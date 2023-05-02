@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Terraform var file
-terraform_var="./terraform/modules/lambda/variables.tf"
+terraform_var="../terraform/modules/lambda/variables.tf"
 
 # The current python runtime version
 pv=$(cat $terraform_var | grep python | grep -oP '(?<=python)\d+\.\d+' )
@@ -14,3 +14,5 @@ latest_version=$(curl -s $RuntimeVersionsURL | jq -r '.shapes.Runtime.enum[]' | 
 # Replace the value of sedme in the python_runtime_version variable definition with the value of the MYVAR environment variable
 sed -i -e "s/$previous_version/$latest_version/g" $terraform_var
 
+echo $previous_version 
+echo $latest_version

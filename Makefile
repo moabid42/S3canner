@@ -5,7 +5,7 @@ GREEN	=\033[32m
 RED		=\033[31m
 RESET	=\033[0m
 
-deploy: latest_version_init banner require
+deploy: require latest_version_init banner
 	@python3 main.py deploy ;
 	@echo "Deployment succeeded!";
 
@@ -28,6 +28,7 @@ apply: banner
 	@echo "Applying succeeded!";
 
 require:
+	@echo "Installing requirements ~"
 	@pip install -r requirements.txt > /dev/null
 	@echo "Requirements satisfied!"
 
