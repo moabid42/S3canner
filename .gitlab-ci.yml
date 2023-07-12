@@ -1,0 +1,10 @@
+stages:
+  - scan
+
+terrascan:
+  image:
+    name: tenable/terrascan:latest
+    entrypoint: ["/bin/sh", "-c"]
+  stage: scan
+  script:
+    - /go/bin/terrascan scan .
