@@ -2,18 +2,27 @@
 resource "aws_kms_key" "yara_matches_topic_key" {
   description             = "KMS key for the Yara matches sns topic"
   deletion_window_in_days = 7
+
+  # Enable Key Rotation
+  enable_key_rotation = true
 }
 
 # KMS key for yara matches topic
 resource "aws_kms_key" "metric_topic_key" {
   description             = "KMS key for the metric sns topic"
   deletion_window_in_days = 7
+
+  # Enable Key Rotation
+  enable_key_rotation = true
 }
 
 # KMS key for yara matches topic
 resource "aws_kms_key" "secrets_match_topic_key" {
   description             = "KMS key for the secrets match sns topic"
   deletion_window_in_days = 7
+
+  # Enable Key Rotation
+  enable_key_rotation = true
 }
 
 // YARA match alerts will be published to this SNS topic.

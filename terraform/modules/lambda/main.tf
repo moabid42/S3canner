@@ -39,6 +39,15 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
   }
 }
 
+resource "aws_kms_key" "env_variables_key" {
+  description             = "KMS key for lambda env variables"
+  deletion_window_in_days = 7
+
+  # Enable Key Rotation
+  enable_key_rotation = true
+}
+
+
 // Create the Lambda function.
 resource "aws_lambda_function" "function" {
   count = var.enabled
@@ -57,8 +66,13 @@ resource "aws_lambda_function" "function" {
   source_code_hash = filebase64sha256("./${var.filename}")
   publish          = true
 
+  # Not encrypting the env variables for Lambda is considered a High finding, howerver due to the lack
+  # of support from Terraform itself, I couldn't implement it
+  # Note : There is a walk around (encrypting and decrypting manually), you can find it here :
+  # https://github.com/hashicorp/terraform-provider-aws/pull/5460/commits/0299a0bbc7d5fab137c63bc19f7e65ac8f54edd7#diff-be1c96c6b01be046c3ccf11ad6365b4ad92def3d1afd22bef65a0de67d025f59
   environment {
     variables = var.environment_variables
+
   }
 
   tags = {

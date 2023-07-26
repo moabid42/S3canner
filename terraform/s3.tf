@@ -51,31 +51,10 @@ resource "aws_s3_bucket" "s3canner_log_bucket" {
 resource "aws_kms_key" "binaries_bucket_key" {
   description             = "KMS key for s3canner binaries bucket"
   deletion_window_in_days = 7
+
+  # Enable Key Rotation
+  enable_key_rotation = true
 }
-
-# resource "aws_kms_key_policy" "my_kms_key_policy" {
-#   key_id = aws_kms_key.binaries_bucket_key.id
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Sid    = "Allow S3 to write event messages to KMS-encrypted S3 bucket"
-#         Effect = "Allow"
-#         Principal = {
-#           Service = "s3.amazonaws.com"
-#         }
-#         Action = [
-#           "kms:GenerateDataKey*",
-#           "kms:Decrypt",
-#           "kms:ScheduleKeyDeletion"
-#         ]
-#         Resource = "*"
-#       }
-#     ]
-#   })
-# }
-
 
 // Source S3 bucket: binaries uploaded here will be automatically analyzed.
 resource "aws_s3_bucket" "s3canner_binaries" {

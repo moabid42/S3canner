@@ -17,6 +17,11 @@ resource "aws_dynamodb_table" "s3canner_yara_matches" {
     type = "N"
   }
 
+  // Enable Point-In-Time Recovery (PITR) for the table
+  point_in_time_recovery {
+    enabled = true
+  }
+  
   tags = {
     Name = "S3canner"
   }
@@ -39,6 +44,11 @@ resource "aws_dynamodb_table" "s3canner_secrets_matches" {
   attribute {
     name = "LambdaVersion"
     type = "N"
+  }
+
+  // Enable Point-In-Time Recovery (PITR) for the table
+  point_in_time_recovery {
+    enabled = true
   }
 
   tags = {

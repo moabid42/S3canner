@@ -7,6 +7,9 @@ provider "aws" {
 resource "aws_kms_key" "remote_state_key" {
   description = "KMS key for Remote state S3 bucket."
   deletion_window_in_days = 7 # the min
+
+  # Enable Key Rotation
+  enable_key_rotation = true
 }
 
 resource "aws_s3_bucket" "terraform_state" {
@@ -44,6 +47,11 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
   read_capacity  = 1
   write_capacity = 1
   hash_key       = "LockID"
+
+  // Enable Point-In-Time Recovery (PITR) for the table
+  point_in_time_recovery {
+    enabled = true
+  }
 
   attribute {
     name = "LockID"

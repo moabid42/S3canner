@@ -2,6 +2,9 @@
 resource "aws_kms_key" "s3_object_queue_key" {
   description             = "KMS key for the s3_object_queue SQS queue"
   deletion_window_in_days = 7
+
+  # Enable Key Rotation
+  enable_key_rotation = true
 }
 
 resource "aws_kms_key_policy" "s3_object_queue_key_policy" {
