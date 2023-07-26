@@ -50,12 +50,12 @@ data "aws_iam_policy_document" "s3_object_queue_policy" {
     actions   = ["sqs:SendMessage"]
     resources = ["${aws_sqs_queue.s3_object_queue.arn}"]
 
-    # // Allow only the S3canner S3 bucket to notify the SQS queue.
-    # condition {
-    #   test     = "ArnEquals"
-    #   variable = "aws:SourceArn"
-    #   values   = ["${aws_s3_bucket.s3canner_binaries.arn}"]
-    # }
+    // Allow only the S3canner S3 bucket to notify the SQS queue.
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = ["${aws_s3_bucket.s3canner_binaries.arn}"]
+    }
   }
 }
 
