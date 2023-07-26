@@ -6,7 +6,7 @@ RED		=\033[31m
 RESET	=\033[0m
 
 deploy: require latest_version_init banner
-	@python3 main.py deploy ;
+	@python3 main.py deploy 1> /dev/null;
 	@echo "Deployment succeeded!";
 
 latest_version_init:

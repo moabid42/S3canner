@@ -82,8 +82,6 @@ resource "aws_lambda_permission" "dispacher_sqs_permission" {
 #   qualifier     = module.s3canner_dispatcher.alias_name
 # }
 
-
-
 resource "aws_iam_policy" "lambda_policy" {
   name_prefix = "lambda_policy_"
 

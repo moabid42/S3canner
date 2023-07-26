@@ -1,5 +1,7 @@
 # Terraform Docomentation
 
+__Description :__ The following documentation serves as a wiki, explaining the config and resources created by terraform, for more info check the comments within the code.
+
 ## Terraform Config
 This configuration file provides various settings that define the behavior and performance of S3canner, a system for detecting malicious files using Amazon Web Services (AWS) resources. Here's a breakdown of the individual settings:
 
@@ -51,7 +53,6 @@ This configuration file provides various settings that define the behavior and p
 **Note** that the aws_s3_bucket resources have versioning enabled to protect against accidental deletes, and aws_s3_bucket_notification resource depends on aws_sqs_queue_policy.s3_object_queue_policy to ensure that the SQS queue policy is created before setting up the notification.
 
 ### SQS
-
 1. Resource **aws_sqs_queue** named **s3_object_queue**:
 - The queue name is created using the **name_prefix** variable.
 - The **visibility_timeout_seconds** parameter is set to the value of **lambda_analyze_timout_sec** variable plus 3 seconds.
@@ -98,3 +99,47 @@ The alarms fire when metrics look abnormal and notify subscribers via the SNS to
 - It creates an alarm named "dynamo_throttles" for the "ReadThrottleEvents" metric.
 - This alarm fires when the sum of read throttle events to the DynamoDB table is greater than zero within a 60-second period. 
 - The alarm description suggests checking the ReadThrottleEvents and WriteThrottleEvents Dynamo metrics to understand which operation is causing throttles, rolling back the analyzer if there was a recent deploy with new YARA rules, and increasing the read capacity for the Dynamo table in the S3canner terraform.tfvars config file if this is normal/expected behavior.
+
+### Lambda
+1. **Lambda Function:** *s3canner_batcher*
+    - Description: Enqueues all S3 objects into SQS for re-analysis.
+    - Handler: main.batch_lambda_handler
+    - Environment Variables:
+        - **BATCH_LAMBDA_NAME**: Name of the batch Lambda.
+        - **BATCH_LAMBDA_QUALIFIER**: Qualifier for the batch Lambda.
+        - **OBJECTS_PER_MESSAGE**: Number of objects per SQS message.
+        - **S3_BUCKET_NAME**: Name of the S3 bucket (s3canner_binaries).
+        - **SQS_QUEUE_URL**: URL of the SQS queue (s3_object_queue).
+    - Permissions: Allowed to be invoked by S3 (s3.amazonaws.com).
+
+2. **Lambda Function:** *s3canner_dispatcher*
+    - Description: Poll SQS events and fire them off to analyzers.
+    - Handler: main.dispatch_lambda_handler
+    - Environment Variables:
+        - **ANALYZE_LAMBDA_NAME**: Name of the analyze Lambda.
+        - **ANALYZE_LAMBDA_QUALIFIER**: Qualifier for the analyze Lambda.
+        - **SECRETS_ANALYZE_LAMBDA_NAME**: Name of the secrets analyzeLambda.
+        - **SECRETS_ANALYZE_LAMBDA_QUALIFIER**: Qualifier for thesecrets analyze Lambda.
+        - **MAX_DISPATCHES**: Maximum number of dispatches.
+        - **SQS_QUEUE_URL**: URL of the SQS queue (s3_object_queue).
+    - Permissions: Allowed to be invoked by SQS (sqs.amazonaws.com).
+
+3. **Lambda Function:** *s3canner_analyzer*
+    - Description: Analyze an object with a set of YARA rules.
+    - Handler: main.analyze_lambda_handler
+    - Environment Variables:
+        - **S3_BUCKET_NAME**: Name of the S3 bucket (s3canner_binaries).
+        - **SQS_QUEUE_URL**: URL of the SQS queue (s3_object_queue).
+        - **YARA_MATCHES_DYNAMO_TABLE_NAME**: Name of the DynamoDB table(s3canner_yara_matches).
+        - **YARA_ALERTS_SNS_TOPIC_ARN**: ARN of the SNS topic(yara_match_alerts).
+    - Permissions: Allowed to be invoked by Lambda functions and perform SQS actions.
+
+4. **Lambda Function:** *s3canner_secrets_analyzer*
+    - Description: Analyze an object with trufflehog to find secrets.
+    - Handler: main.secrets_analyze_lambda_handler
+    - Environment Variables:
+        - **S3_BUCKET_NAME**: Name of the S3 bucket (s3canner_binaries).
+        - **SQS_QUEUE_URL**: URL of the SQS queue (s3_object_queue).
+        - **SECRETS_MATCHES_DYNAMO_TABLE_NAME**: Name of the DynamoDBtable (s3canner_secrets_matches).
+        - **SECRETS_ALERTS_SNS_TOPIC_ARN**: ARN of the SNS topic(secrets_match_alerts).
+    - Permissions: Allowed to be invoked by Lambda functions andperform SQS actions.
