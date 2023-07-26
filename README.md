@@ -87,3 +87,4 @@ This module consists of several resources, including an IAM policy document, an 
 Here are some potential future features and enhancements that could be added to the project:
 
 - Central Yara bucket, where we should be updating (daily?) and pulling new CVE from public repos + custom rules.
+- Creating report and send it via SNS instead of just a mssg.
