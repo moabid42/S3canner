@@ -53,7 +53,7 @@ This project is about creating a serverless AWS pipeline where any object added 
       ```
 
 ## Architecture
-![smth](./img/newchart.png)
+![smth](./img/flow.png)
 
 ## Description
 - We start by setting up our S3canner system to analyze various files that are collected and delivered to their S3 bucket. The files could be of different types such as executable binaries, email attachments, documents, and more.
