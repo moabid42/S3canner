@@ -46,7 +46,7 @@ This project is about creating a serverless AWS pipeline where any object added 
       ```bash
         make backend-destory
       ```
-  5. *After creating the tool enviroment, you have to subscribed manually to your desired **SNS Protocol**, in the console*.
+  5. _After creating the tool enviroment, you have to subscribed manually to your desired **SNS Protocol**, in the console_.
   6. For testing purposes add the enviroment variable `.env`, which should contain
       ```bash
       SQS_URL = "your url here"
@@ -81,3 +81,9 @@ This module consists of several resources, including an IAM policy document, an 
 `For more details about the infrastructure you can check the readme in the terraform folder.`
 
 `And for more info regarding the lambda functions check the readme in the lambda_functions folder.`
+
+### Future Features
+
+Here are some potential future features and enhancements that could be added to the project:
+
+- Central Yara bucket, where we should be updating (daily?) and pulling new CVE from public repos + custom rules.

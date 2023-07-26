@@ -165,7 +165,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   queue {
     queue_arn = aws_sqs_queue.s3_object_queue.arn
-    events    = ["s3:ObjectCreated:*"]
+    events    = ["s3:ObjectCreated:Put"]
   }
 
   // The queue policy must be created before we can configure the S3 notification.
@@ -178,7 +178,7 @@ resource "aws_s3_bucket_notification" "lambda_bucket_notification" {
 
   lambda_function {
     lambda_function_arn = module.s3canner_batcher.function_arn
-    events              = ["s3:ObjectCreated:*"]
+    events              = ["s3:ObjectCreated:Put"]
     filter_prefix       = ""
     filter_suffix       = ""
   }
